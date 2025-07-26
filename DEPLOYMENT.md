@@ -1,47 +1,37 @@
-# 🚀 SolidTracker Deployment Guide
+# 🚀 SolidTracker Deployment Guide (Turbo Monorepo)
 
 ## 📁 **Monorepo Structure**
 
 ```
-SolidTracker/
+SolidTracker/ (Turbo monorepo)
+├── package.json              # Root with turbo scripts
+├── turbo.json                # Turbo configuration  
 ├── apps/
-│   ├── web/              # 🏢 Admin Dashboard (Managers/HR)
-│   ├── desktop-web/      # 👨‍💻 Employee Interface (Web version)
-│   └── desktop/          # 💻 Electron Desktop App
-└── packages/             # 📦 Shared packages
+│   ├── web/                  # 🏢 Admin Dashboard (@time-tracker/web)
+│   ├── desktop-web/          # 👨‍💻 Employee Interface (@time-tracker/desktop-web)
+│   └── desktop/              # 💻 Electron Desktop App
+└── packages/                 # 📦 Shared packages
 ```
 
-## 🌐 **Three Separate Deployments**
-
-### **1. 🏢 Admin Dashboard** (`apps/web`)
-- **Purpose**: Admin portal for managers to track employees
-- **Features**: Employee management, project oversight, reports
-- **Deploy to**: `solidtracker-admin.vercel.app`
-
-### **2. 👨‍💻 Employee Web App** (`apps/desktop-web`) 
-- **Purpose**: Web interface for employees to track time
-- **Features**: Time tracking, task management, screenshots
-- **Deploy to**: `solidtracker-employee.vercel.app`
-
-### **3. 💻 Desktop App** (`apps/desktop`)
-- **Purpose**: Electron app for offline time tracking
-- **Features**: Same as web app + offline support
-- **Deploy to**: GitHub Releases (downloadable .exe/.dmg/.AppImage)
+## 🌐 **Your Current Dev Commands:**
+- **Admin**: `npm run dev:web` (port 3000)
+- **Employee**: `npm run dev:desktop` (port 3001)
 
 ---
 
 ## 🚀 **Step 1: Deploy Admin Dashboard** 
 
-### **A. Create New Vercel Project**
+### **A. Create Vercel Project for Admin**
 1. Go to [vercel.com](https://vercel.com) → **"Add New Project"**
 2. Import: `MayankBharati/solidtracker`
 3. **Configure:**
    - **Project Name**: `solidtracker-admin`
    - **Framework**: Next.js
-   - **Root Directory**: `apps/web`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `.next`
+   - **Root Directory**: `.` (root directory, NOT apps/web)
+   - **Build Command**: `turbo run build --filter=@time-tracker/web`
+   - **Output Directory**: `apps/web/.next`
    - **Install Command**: `npm install`
+   - **Development Command**: `npm run dev:web`
 
 ### **B. Environment Variables:**
 ```bash
@@ -70,10 +60,11 @@ SMTP_PASSWORD=your-app-password
 3. **Configure:**
    - **Project Name**: `solidtracker-employee`
    - **Framework**: Next.js
-   - **Root Directory**: `apps/desktop-web`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `out` (this app uses static export)
+   - **Root Directory**: `.` (root directory, NOT apps/desktop-web)
+   - **Build Command**: `turbo run build --filter=@time-tracker/desktop-web`
+   - **Output Directory**: `apps/desktop-web/.next`
    - **Install Command**: `npm install`
+   - **Development Command**: `npm run dev:desktop`
 
 ### **B. Environment Variables:**
 ```bash
@@ -90,25 +81,13 @@ NEXT_PUBLIC_APP_URL=https://solidtracker-employee.vercel.app
 
 ## 💻 **Step 3: Build & Release Desktop App**
 
-### **A. Build Desktop Apps**
+### **A. Build Desktop Apps (Your Current Process)**
 ```bash
-# Navigate to project
+# You're already doing this from root:
 cd apps/desktop
-
-# Install dependencies
 npm install
-
-# Build Windows version
 npm run build:win
 # Output: dist/SolidTracker Setup 1.0.0.exe (77.7 MB)
-
-# Build Mac version (if on macOS)
-npm run build:mac
-# Output: dist/SolidTracker-1.0.0.dmg
-
-# Build Linux version (if on Linux)  
-npm run build:linux
-# Output: dist/SolidTracker-1.0.0.AppImage
 ```
 
 ### **B. Create GitHub Release**
@@ -116,10 +95,7 @@ npm run build:linux
 2. **Click**: "Create a new release"
 3. **Tag**: `v1.0.0`
 4. **Title**: `SolidTracker v1.0.0 - Desktop Apps`
-5. **Upload Files**:
-   - `SolidTracker-Setup-1.0.0.exe` (Windows)
-   - `SolidTracker-1.0.0.dmg` (Mac - when ready)
-   - `SolidTracker-1.0.0.AppImage` (Linux - when ready)
+5. **Upload**: `SolidTracker-Setup-1.0.0.exe`
 6. **Publish Release**
 
 ### **C. Update Download URLs**
@@ -140,72 +116,52 @@ const DESKTOP_APPS = {
 
 ---
 
-## 🔗 **Final Architecture**
+## 🔗 **Vercel Project Settings Summary**
 
-### **🌐 Live URLs:**
-- **Admin Dashboard**: `https://solidtracker-admin.vercel.app`
-  - Managers login here
-  - Employee management, project oversight
-  - Download page for desktop apps
+### **🏢 Admin Dashboard Project:**
+```bash
+Repository: MayankBharati/solidtracker
+Root Directory: . (root)
+Build Command: turbo run build --filter=@time-tracker/web
+Output Directory: apps/web/.next
+Dev Command: npm run dev:web
+```
 
-- **Employee Web App**: `https://solidtracker-employee.vercel.app`  
-  - Employees can use this directly in browser
-  - Same features as desktop app
-  - No installation required
+### **👨‍💻 Employee Web Project:**
+```bash
+Repository: MayankBharati/solidtracker (same repo)
+Root Directory: . (root)  
+Build Command: turbo run build --filter=@time-tracker/desktop-web
+Output Directory: apps/desktop-web/.next
+Dev Command: npm run dev:desktop
+```
 
-- **Desktop Downloads**: Available from admin dashboard
-  - Windows: Direct download from GitHub
-  - Mac/Linux: Coming soon placeholders
+---
 
-### **🎯 User Flows:**
+## 🎯 **Key Differences from Standard Setup:**
 
-**For Managers:**
-1. Visit: `solidtracker-admin.vercel.app`
-2. Login → Dashboard → Manage employees & projects
-3. Download desktop apps for employees
-
-**For Employees (Option 1 - Web):**
-1. Visit: `solidtracker-employee.vercel.app` 
-2. Login → Start time tracking directly in browser
-
-**For Employees (Option 2 - Desktop):**
-1. Download .exe from admin dashboard
-2. Install → Login → Offline time tracking with screenshots
+✅ **Single Repository** - Both apps deploy from same repo  
+✅ **Root Directory** - Both use root (not app subdirectories)  
+✅ **Turbo Filtering** - Different build commands filter to specific apps  
+✅ **Shared Dependencies** - npm install at root installs everything  
+✅ **Monorepo Benefits** - Shared packages, consistent tooling  
 
 ---
 
 ## ✅ **Deployment Checklist**
 
-- [ ] Deploy admin dashboard to Vercel
-- [ ] Deploy employee web app to Vercel  
+- [ ] Create admin Vercel project (root + turbo filter web)
+- [ ] Create employee Vercel project (root + turbo filter desktop-web)  
+- [ ] Add environment variables to both projects
 - [ ] Build Windows desktop app
 - [ ] Create GitHub release with .exe file
 - [ ] Update download URLs in admin app
-- [ ] Test all three deployments
-- [ ] Update DNS (optional custom domains)
+- [ ] Test all deployments
 
-## 🔧 **Environment Variables Reference**
+## 🎉 **Final Result**
+Your Turbo monorepo will deploy as:
+1. **Admin**: `solidtracker-admin.vercel.app` (from turbo web filter)
+2. **Employee**: `solidtracker-employee.vercel.app` (from turbo desktop filter)
+3. **Desktop**: GitHub releases with .exe downloads
 
-### **Required for Both Web Apps:**
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
-```
-
-### **Additional for Admin App:**
-```bash
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIs...
-EMAIL_FROM=admin@yourcompany.com
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-16-char-app-password
-```
-
-## 🎉 **Result**
-Three fully functional deployments:
-1. **Admin dashboard** for managers
-2. **Employee web app** for browser-based tracking  
-3. **Desktop app downloads** for offline usage
-
-**All connected to the same Supabase backend for real-time sync! 🚀** 
+**Perfect setup for your `npm run dev:web` and `npm run dev:desktop` workflow! 🚀** 
