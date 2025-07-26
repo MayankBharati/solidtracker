@@ -7,7 +7,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "dev:web": "turbo run dev --filter=@time-tracker/web",
-    "dev:desktop": "turbo run dev --filter=@time-tracker/desktop-web"
+    "dev:desktop": "turbo run dev --filter=@time-tracker/desktop-web",
+    "dev:homepage": "turbo run dev --filter=@time-tracker/homepage"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
