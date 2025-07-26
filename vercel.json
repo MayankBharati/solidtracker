@@ -1,8 +1,4 @@
 {
   "version": 2,
-  "buildCommand": "turbo run build --filter=@time-tracker/web",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "npm install",
-  "devCommand": "npm run dev:web",
   "framework": "nextjs"
 } 
