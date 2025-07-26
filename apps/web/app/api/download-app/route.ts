@@ -4,22 +4,22 @@ import { headers } from 'next/headers';
 // Desktop app download information
 const DESKTOP_APPS = {
   windows: {
-    fileName: 'SolidTracker-Setup-1.0.0.exe',
+    fileName: 'SolidTracker.Setup.1.0.0.exe',
     fileSize: '77.7 MB',
     supported: true,
     downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.0.0/SolidTracker.Setup.1.0.0.exe'
   },
   mac: {
-    fileName: 'SolidTracker-1.0.0.dmg',
+    fileName: 'SolidTracker.1.0.0.dmg',
     fileSize: '~85 MB',
     supported: false,
-    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.0.0/SolidTracker-1.0.0.dmg'
+    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.0.0/SolidTracker.1.0.0.dmg'
   },
   linux: {
-    fileName: 'SolidTracker-1.0.0.AppImage', 
+    fileName: 'SolidTracker.1.0.0.AppImage', 
     fileSize: '~80 MB',
     supported: false,
-    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.0.0/SolidTracker-1.0.0.AppImage'
+    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.0.0/SolidTracker.1.0.0.AppImage'
   }
 };
 
