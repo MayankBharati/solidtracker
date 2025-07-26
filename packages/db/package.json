@@ -1,0 +1,9 @@
+{
+  "name": "@time-tracker/db",
+  "version": "0.1.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.5"
+  }
+}
