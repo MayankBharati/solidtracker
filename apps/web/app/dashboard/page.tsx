@@ -19,6 +19,7 @@ import {
   Timer,
   UserCheck,
   BarChart3,
+  Download,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -311,7 +312,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <Link href="/employees">
                 <Button className="w-full justify-start bg-blue-600 hover:bg-blue-700">
                   <Users className="h-4 w-4 mr-2" />
@@ -330,7 +331,13 @@ export default function DashboardPage() {
                   View Activity
                 </Button>
               </Link>
-              <Button variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-200">
+              <Link href="/download">
+                <Button variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-200">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download App
+                </Button>
+              </Link>
+              <Button variant="outline" className="w-full justify-start hover:bg-gray-50 hover:border-gray-200">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Generate Report
               </Button>

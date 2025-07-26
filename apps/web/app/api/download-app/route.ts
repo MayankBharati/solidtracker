@@ -1,105 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { database } from '@time-tracker/api';
-import { execSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import { headers } from 'next/headers';
 
-export async function POST(request: NextRequest) {
+// Desktop app download information
+const DESKTOP_APPS = {
+  windows: {
+    fileName: 'SolidTracker-Setup-1.0.0.exe',
+    fileSize: '77.7 MB',
+    supported: true,
+    // For now, we'll redirect to a GitHub release or file hosting service
+    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.0.0/SolidTracker-Setup-1.0.0.exe'
+  },
+  mac: {
+    fileName: 'SolidTracker-1.0.0.dmg',
+    fileSize: '85 MB',
+    supported: false,
+    downloadUrl: null
+  },
+  linux: {
+    fileName: 'SolidTracker-1.0.0.AppImage',
+    fileSize: '80 MB', 
+    supported: false,
+    downloadUrl: null
+  }
+};
+
+export async function GET(request: NextRequest) {
   try {
-    const { employeeId } = await request.json();
-
-    if (!employeeId) {
-      return NextResponse.json({ error: 'Employee ID is required' }, { status: 400 });
-    }
-
-    // Verify that the employee exists and is active
-    const { data: employees, error } = await database.getEmployees();
-    if (error) {
-      console.error('Database error:', error);
-      return NextResponse.json({ error: 'Failed to verify employee' }, { status: 500 });
-    }
-
-    const employee = employees?.find(emp => emp.id === employeeId);
-    if (!employee) {
-      return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
-    }
-
-    if (employee.status !== 'active') {
-      return NextResponse.json({ error: 'Employee account is not activated' }, { status: 403 });
-    }
-
-    // Determine the platform and file extension
-    const userAgent = request.headers.get('user-agent') || '';
-    let platform = 'win';
-    let fileExtension = '.exe';
+    const { searchParams } = new URL(request.url);
+    const platform = searchParams.get('platform') || 'windows';
     
-    if (userAgent.includes('Mac')) {
-      platform = 'mac';
-      fileExtension = '.dmg';
-    } else if (userAgent.includes('Linux')) {
-      platform = 'linux';
-      fileExtension = '.AppImage';
+    // Validate platform
+    if (!DESKTOP_APPS[platform as keyof typeof DESKTOP_APPS]) {
+      return NextResponse.json({ error: 'Invalid platform' }, { status: 400 });
     }
 
-    // Check if the build already exists
-    const desktopPath = path.resolve(process.cwd(), '../../apps/desktop');
-    const distPath = path.join(desktopPath, 'dist');
-    
-    // Look for existing build files
-    let buildFile = null;
-    if (fs.existsSync(distPath)) {
-      const files = fs.readdirSync(distPath);
-      buildFile = files.find(file => file.endsWith(fileExtension));
+    const appInfo = DESKTOP_APPS[platform as keyof typeof DESKTOP_APPS];
+
+    // Check if platform is supported
+    if (!appInfo.supported) {
+      return NextResponse.json({ 
+        error: 'Platform not supported yet',
+        message: `${platform} version is coming soon!`,
+        supported: false
+      }, { status: 404 });
     }
 
-    if (!buildFile) {
-      // Build doesn't exist, create one
-      console.log(`Building Electron app for ${platform}...`);
+    // For now, redirect to the download URL
+    if (appInfo.downloadUrl) {
+      // Log the download for analytics
+      console.log(`Download requested: ${platform} - ${appInfo.fileName}`);
       
-      try {
-        // Change to desktop directory and build
-        process.chdir(desktopPath);
-        
-        // Install dependencies if needed
-        if (!fs.existsSync(path.join(desktopPath, 'node_modules'))) {
-          execSync('npm install', { stdio: 'inherit' });
-        }
-        
-        // Build the app
-        execSync(`npm run build:${platform}`, { stdio: 'inherit' });
-        
-        // Check for the built file again
-        if (fs.existsSync(distPath)) {
-          const files = fs.readdirSync(distPath);
-          buildFile = files.find(file => file.endsWith(fileExtension));
-        }
-        
-        if (!buildFile) {
-          throw new Error('Build file not found after building');
-        }
-        
-      } catch (error) {
-        console.error('Build failed:', error);
-        return NextResponse.json({ 
-          error: 'Failed to build application', 
-          details: error instanceof Error ? error.message : 'Unknown error' 
-        }, { status: 500 });
-      }
+      // For production, you might want to:
+      // 1. Track downloads in database
+      // 2. Serve files from cloud storage (AWS S3, etc.)
+      // 3. Add authentication if needed
+      
+      return NextResponse.redirect(appInfo.downloadUrl);
     }
 
-    // Create download URL
-    const downloadUrl = `/api/download-file?file=${encodeURIComponent(buildFile)}&employee=${employeeId}`;
-    
+    // If no download URL is available
     return NextResponse.json({
-      success: true,
-      downloadUrl,
-      fileName: buildFile,
-      platform,
-      message: 'App is ready for download'
-    });
+      error: 'Download not available',
+      message: 'Desktop app is currently being prepared. Please try again later.',
+      appInfo: {
+        fileName: appInfo.fileName,
+        fileSize: appInfo.fileSize,
+        platform: platform
+      }
+    }, { status: 503 });
 
   } catch (error) {
     console.error('Download app API error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
+}
+
+// Alternative endpoint to get download information without triggering download
+export async function POST(request: NextRequest) {
+  try {
+    const { platform } = await request.json();
+    
+    if (!platform || !DESKTOP_APPS[platform as keyof typeof DESKTOP_APPS]) {
+      return NextResponse.json({ error: 'Invalid platform' }, { status: 400 });
+    }
+
+    const appInfo = DESKTOP_APPS[platform as keyof typeof DESKTOP_APPS];
+    
+    return NextResponse.json({
+      success: true,
+      platform,
+      ...appInfo,
+      downloadEndpoint: `/api/download-app?platform=${platform}`
+    });
+
+  } catch (error) {
+    console.error('Download app info API error:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
