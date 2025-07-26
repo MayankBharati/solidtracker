@@ -1,0 +1,46 @@
+{
+  "name": "@time-tracker/desktop-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack --port 3001",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.5",
+    "@time-tracker/api": "*",
+    "@time-tracker/db": "*",
+    "@time-tracker/ui": "*",
+    "@time-tracker/validation": "*",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "crypto-js": "^4.2.0",
+    "date-fns": "^4.1.0",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.294.0",
+    "next": "^15.3.0",
+    "postcss": "^8.4.32",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.5.2",
+    "tailwind-merge": "^2.2.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/crypto-js": "^4.2.2",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^20",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.5",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5"
+  }
+}
