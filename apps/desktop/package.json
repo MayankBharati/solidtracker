@@ -1,0 +1,67 @@
+{
+  "name": "desktop",
+  "version": "1.0.0",
+  "description": "Time Tracker Desktop App",
+  "author": "Mercor Time Tracker Team",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build:web": "node build-web.js",
+    "build:electron": "npx electron-builder",
+    "build": "npm run build:web && npm run build:electron",
+    "build:win": "npm run build:web && npx electron-builder --win --config.npmRebuild=false --config.nodeGypRebuild=false",
+    "build:mac": "npm run build:web && npx electron-builder --mac",
+    "build:linux": "npm run build:web && npx electron-builder --linux",
+    "dist": "npm run build"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
+    "@time-tracker/api": "*",
+    "@time-tracker/db": "*",
+    "dotenv": "^16.0.3",
+    "mime-types": "^2.1.35"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "7zip-bin": "^5.2.0",
+    "app-builder-bin": "^4.2.0",
+    "electron": "^30.5.1",
+    "electron-builder": "^26.0.12"
+  },
+  "electron": "electron .",
+  "dist": "electron-builder",
+  "main": "main.js",
+  "build": {
+    "appId": "com.mercor.timetracker",
+    "productName": "Mercor Time Tracker",
+    "electronVersion": "30.0.2",
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "buildDependenciesFromSource": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      ".env.local",
+      "web-dist/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "entitlements": null,
+      "entitlementsInherit": null
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
