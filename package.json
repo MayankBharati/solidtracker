@@ -1,0 +1,30 @@
+{
+  "name": "time-tracking-app",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "dev:web": "turbo run dev --filter=@time-tracker/web",
+    "dev:desktop": "turbo run dev --filter=@time-tracker/desktop-web"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "app-builder-bin": "^4.2.0",
+    "prettier": "^3.6.0",
+    "turbo": "^2.5.4",
+    "typescript": "5.8.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@10.2.4",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "7zip-bin": "^5.2.0"
+  }
+}
