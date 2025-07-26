@@ -5,7 +5,20 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY", 
+        "NEXT_PUBLIC_APP_URL",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "EMAIL_FROM",
+        "SMTP_HOST",
+        "SMTP_PORT", 
+        "SMTP_USER",
+        "SMTP_PASSWORD",
+        "PASS",
+        "NODE_ENV"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -15,7 +28,20 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY", 
+        "NEXT_PUBLIC_APP_URL",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "EMAIL_FROM",
+        "SMTP_HOST",
+        "SMTP_PORT", 
+        "SMTP_USER",
+        "SMTP_PASSWORD",
+        "PASS",
+        "NODE_ENV"
+      ]
     }
   }
 }
