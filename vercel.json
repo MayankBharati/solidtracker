@@ -1,32 +1,8 @@
 {
   "version": 2,
-  "name": "solidtracker",
-  "builds": [
-    {
-      "src": "apps/web/package.json",
-      "use": "@vercel/next",
-      "config": {
-        "projectSettings": {
-          "framework": "nextjs"
-        }
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "apps/web/$1"
-    }
-  ],
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
-    "NEXT_PUBLIC_APP_URL": "@next_public_app_url"
-  },
-  "functions": {
-    "apps/web/app/api/**": {
-      "maxDuration": 30
-    }
-  }
+  "buildCommand": "cd apps/web && npm run build",
+  "outputDirectory": "apps/web/.next",
+  "installCommand": "npm install && cd apps/web && npm install",
+  "devCommand": "cd apps/web && npm run dev",
+  "framework": "nextjs"
 } 
