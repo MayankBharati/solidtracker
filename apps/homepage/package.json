@@ -10,7 +10,6 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@time-tracker/ui": "*",
     "lucide-react": "^0.263.1",
     "next": "15.3.5",
     "react": "^18",

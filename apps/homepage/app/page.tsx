@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@time-tracker/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@time-tracker/ui";
 import { 
   Clock, 
   Users, 
@@ -78,7 +76,6 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative container mx-auto px-4 py-20">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl mb-8">
@@ -93,25 +90,22 @@ export default function HomePage() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button 
-                size="lg"
-                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              <button 
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
                 onClick={() => window.open('https://solidtracker-admin.vercel.app', '_blank')}
               >
                 <Users className="h-5 w-5 mr-2" />
                 Admin Dashboard
                 <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-              <Button 
-                variant="outline"
-                size="lg"
-                className="border-2 border-orange-300 text-orange-600 hover:bg-orange-50 font-semibold px-8 py-4 text-lg rounded-xl transition-all duration-300"
+              </button>
+              <button 
+                className="border-2 border-orange-300 text-orange-600 hover:bg-orange-50 font-semibold px-8 py-4 text-lg rounded-xl transition-all duration-300 flex items-center justify-center"
                 onClick={() => window.open('https://solidtracker-employee.vercel.app', '_blank')}
               >
                 <Monitor className="h-5 w-5 mr-2" />
                 Employee Portal
                 <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
+              </button>
             </div>
 
             <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
@@ -147,17 +141,15 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="border-0 bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-                <CardHeader className="text-center pb-4">
+              <div key={index} className="bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-gray-200 p-6">
+                <div className="text-center pb-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-600 rounded-2xl mb-4">
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-xl font-bold">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
+                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
                   <p className="text-gray-600">{feature.description}</p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -177,13 +169,13 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {platforms.map((platform, index) => (
-              <Card key={index} className="border-0 bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-                <CardHeader className="text-center pb-4">
+              <div key={index} className="bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-gray-200 p-6">
+                <div className="text-center pb-4">
                   <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-600 rounded-3xl mb-4">
                     {platform.icon}
                   </div>
-                  <CardTitle className="text-xl font-bold">{platform.title}</CardTitle>
-                  <div className="flex items-center justify-center gap-2">
+                  <h3 className="text-xl font-bold mb-2">{platform.title}</h3>
+                  <div className="flex items-center justify-center gap-2 mb-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       platform.status === 'Available' 
                         ? 'bg-green-100 text-green-700' 
@@ -192,13 +184,10 @@ export default function HomePage() {
                       {platform.status}
                     </span>
                   </div>
-                </CardHeader>
-                <CardContent className="text-center">
                   <p className="text-gray-600 mb-4">{platform.description}</p>
                   {platform.status === 'Available' && (
-                    <Button 
-                      variant="outline" 
-                      className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+                    <button 
+                      className="w-full border border-orange-300 text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-lg transition-colors"
                       onClick={() => {
                         if (platform.title === 'Desktop App') {
                           window.open('https://solidtracker-admin.vercel.app/download', '_blank');
@@ -207,12 +196,12 @@ export default function HomePage() {
                         }
                       }}
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className="h-4 w-4 mr-2 inline" />
                       {platform.title === 'Desktop App' ? 'Download' : 'Access'}
-                    </Button>
+                    </button>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -230,26 +219,22 @@ export default function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg"
-              variant="secondary"
-              className="bg-white text-orange-600 hover:bg-gray-100 font-semibold px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            <button 
+              className="bg-white text-orange-600 hover:bg-gray-100 font-semibold px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
               onClick={() => window.open('https://solidtracker-admin.vercel.app', '_blank')}
             >
               <TrendingUp className="h-5 w-5 mr-2" />
               Start Free Trial
               <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-            <Button 
-              size="lg"
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-orange-600 font-semibold px-8 py-4 text-lg rounded-xl transition-all duration-300"
+            </button>
+            <button 
+              className="border-2 border-white text-white hover:bg-white hover:text-orange-600 font-semibold px-8 py-4 text-lg rounded-xl transition-all duration-300 flex items-center justify-center"
               onClick={() => window.open('https://solidtracker-employee.vercel.app', '_blank')}
             >
               <Monitor className="h-5 w-5 mr-2" />
               Try Employee Portal
               <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
+            </button>
           </div>
         </div>
       </section>
