@@ -1,6 +1,6 @@
 {
   "name": "desktop",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "SolidTracker Desktop App",
   "author": "SolidTracker Team",
   "private": true,
@@ -20,6 +20,7 @@
     "@time-tracker/api": "*",
     "@time-tracker/db": "*",
     "dotenv": "^16.0.3",
+    "mime-db": "^1.52.0",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {

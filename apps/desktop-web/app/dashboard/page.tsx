@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@time-tracker/ui";
 import { Button } from "@time-tracker/ui";
@@ -21,6 +21,8 @@ import {
   LogOut,
   Timer,
   BarChart3,
+  RefreshCw,
+  Bell,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -39,10 +41,16 @@ export default function DashboardPage() {
   const [activeTimeEntry, setActiveTimeEntry] = useState<TimeEntry | null>(null);
   const [todayEntries, setTodayEntries] = useState<TimeEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [timer, setTimer] = useState<number>(0);
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [selectedTask, setSelectedTask] = useState<string>("");
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [newTasksCount, setNewTasksCount] = useState<number>(0);
+  const [previousTasksCount, setPreviousTasksCount] = useState<number>(0);
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>('');
 
   useEffect(() => {
     checkAuth();
@@ -52,6 +60,18 @@ export default function DashboardPage() {
     if (employee) {
       loadDashboardData();
     }
+  }, [employee]);
+
+  // Real-time polling effect - refresh data every 30 seconds
+  useEffect(() => {
+    if (!employee) return;
+
+    const pollInterval = setInterval(() => {
+      console.log("🔄 Auto-refreshing dashboard data...");
+      refreshDashboardData();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(pollInterval);
   }, [employee]);
 
   useEffect(() => {
@@ -107,6 +127,27 @@ export default function DashboardPage() {
 
         setProjectsWithTasks(projectsWithTasksData);
 
+        // Check for new tasks
+        const currentTasksCount = tasksData.length;
+        if (previousTasksCount > 0 && currentTasksCount > previousTasksCount) {
+          const newTasks = currentTasksCount - previousTasksCount;
+          setNewTasksCount(newTasks);
+          console.log(`🎉 ${newTasks} new task(s) detected!`);
+          
+          // Show notification if in Electron
+          if (ipcRenderer) {
+            ipcRenderer.send('show-notification', {
+              title: 'New Tasks Assigned',
+              body: `You have ${newTasks} new task(s) assigned to you!`,
+              icon: '🎯'
+            });
+          } else {
+            // Show toast notification for web users
+            showToastNotification(`🎉 You have ${newTasks} new task(s) assigned to you!`);
+          }
+        }
+        setPreviousTasksCount(currentTasksCount);
+
         // Set default selections
         if (projectsWithTasksData.length > 0) {
           const firstProject = projectsWithTasksData[0];
@@ -152,8 +193,117 @@ export default function DashboardPage() {
     }
   };
 
+  // Separate function for refreshing data (used by polling and manual refresh)
+  const refreshDashboardData = useCallback(async () => {
+    if (!employee) return;
+
+    setRefreshing(true);
+    try {
+      console.log("🔄 Refreshing dashboard data for employee:", employee.id);
+
+      // Load employee's projects
+      const { data: projectsData, error: projectsError } = await database.getEmployeeProjects(employee.id);
+
+      // Load employee's tasks
+      const { data: tasksData, error: tasksError } = await database.getEmployeeTasks(employee.id);
+
+      // Combine projects with their tasks
+      if (projectsData && Array.isArray(projectsData) && tasksData && Array.isArray(tasksData)) {
+        const projectsWithTasksData: ProjectWithTasks[] = projectsData.map((project: any) => {
+          const projectTasks = tasksData.filter((task: any) => task.project_id === project.id) as any[];
+          return {
+            ...project,
+            tasks: projectTasks as unknown as Task[]
+          } as ProjectWithTasks;
+        });
+
+        setProjectsWithTasks(projectsWithTasksData);
+
+        // Check for new tasks
+        const currentTasksCount = tasksData.length;
+        if (previousTasksCount > 0 && currentTasksCount > previousTasksCount) {
+          const newTasks = currentTasksCount - previousTasksCount;
+          setNewTasksCount(newTasks);
+          console.log(`🎉 ${newTasks} new task(s) detected!`);
+          
+          // Show notification if in Electron
+          if (ipcRenderer) {
+            ipcRenderer.send('show-notification', {
+              title: 'New Tasks Assigned',
+              body: `You have ${newTasks} new task(s) assigned to you!`,
+              icon: '🎯'
+            });
+          } else {
+            // Show toast notification for web users
+            showToastNotification(`🎉 You have ${newTasks} new task(s) assigned to you!`);
+          }
+        }
+        setPreviousTasksCount(currentTasksCount);
+      }
+
+      // Load active time entry
+      const { data: activeEntry, error: activeError } = await database.getActiveTimeEntry(employee.id);
+
+      if (activeEntry) {
+        setActiveTimeEntry(activeEntry);
+        const startTime = new Date(activeEntry.started_at).getTime();
+        const now = new Date().getTime();
+        setTimer(Math.floor((now - startTime) / 1000));
+      } else {
+        setActiveTimeEntry(null);
+        setTimer(0);
+      }
+
+      // Load today's entries
+      const { data: todayData, error: todayError } = await database.getTodayTimeEntries(employee.id);
+
+      if (todayData) {
+        setTodayEntries(todayData);
+      } else {
+        setTodayEntries([]);
+      }
+
+      setLastRefresh(new Date());
+    } catch (error) {
+      console.error("Error refreshing dashboard data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [employee, previousTasksCount, ipcRenderer]);
+
+  // Manual refresh function
+  const handleManualRefresh = async () => {
+    console.log("🔄 Manual refresh triggered");
+    await refreshDashboardData();
+  };
+
+  // Clear new tasks notification
+  const clearNewTasksNotification = () => {
+    setNewTasksCount(0);
+  };
+
+  // Show toast notification
+  const showToastNotification = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 5000); // Hide after 5 seconds
+  };
+
   const handleStartTimer = async () => {
-    if (!employee || !selectedProject || !selectedTask) return;
+    if (!employee) {
+      showToastNotification('❌ Please log in to start timer');
+      return;
+    }
+
+    if (!selectedProject) {
+      showToastNotification('❌ Please select a project first');
+      return;
+    }
+
+    if (!selectedTask) {
+      showToastNotification('❌ Please select a task first');
+      return;
+    }
 
     try {
       const { data, error } = await database.startTimeEntry(
@@ -166,6 +316,9 @@ export default function DashboardPage() {
         setTimer(0);
         await loadDashboardData(); // Refresh today's entries
         
+        // Show success notification
+        showToastNotification('✅ Timer started successfully!');
+        
         // Start screenshots in Electron
         if (ipcRenderer) {
           console.log('🎬 Sending start-screenshots message to Electron for employee:', employee.id);
@@ -175,6 +328,7 @@ export default function DashboardPage() {
         }
       } else {
         console.error("Error starting timer:", error);
+        showToastNotification('❌ Failed to start timer. Please try again.');
       }
     } catch (error) {
       console.error("Error starting timer:", error);
@@ -283,19 +437,50 @@ export default function DashboardPage() {
                 </h1>
               </div>
               {employee && (
-                <span className="text-sm text-gray-600">
-                  Welcome, {employee.name}
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-sm text-gray-600">
+                    Welcome, {employee.name}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    Auto-refresh: {lastRefresh.toLocaleTimeString()}
+                  </span>
+                </div>
               )}
             </div>
-            <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center space-x-3">
+              {/* New Tasks Notification */}
+              {newTasksCount > 0 && (
+                <div 
+                  className="flex items-center space-x-2 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-orange-200 transition-colors"
+                  onClick={clearNewTasksNotification}
+                  title="Click to dismiss notification"
+                >
+                  <Bell className="h-4 w-4" />
+                  <span>{newTasksCount} new task{newTasksCount > 1 ? 's' : ''}</span>
+                </div>
+              )}
+              
+              {/* Refresh Button */}
+              <Button 
+                variant="outline" 
+                onClick={handleManualRefresh}
+                disabled={refreshing}
+                className="hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-colors"
+                title={`Last refreshed: ${lastRefresh.toLocaleTimeString()}`}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+                className="hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -367,49 +552,75 @@ export default function DashboardPage() {
                   <div className="text-sm text-gray-600 mb-4">No active timer</div>
                   <div className="h-[120px] flex items-center justify-center">
                     {projectsWithTasks.length > 0 ? (
-                      <div className="space-y-3 w-full max-w-sm">
-                        <div className="grid grid-cols-1 gap-2">
-                          <select
-                            value={selectedProject}
-                            onChange={(e) => {
-                              setSelectedProject(e.target.value);
-                              // Clear the task selection when project changes
-                              setSelectedTask("");
-                            }}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                          >
-                            <option value="">Select Project</option>
-                            {projectsWithTasks.map((project) => (
-                              <option key={project.id} value={project.id}>
-                                {project.name}
-                              </option>
-                            ))}
-                          </select>
-                          <select
-                            value={selectedTask}
-                            onChange={(e) => setSelectedTask(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                            disabled={!selectedProject}
-                          >
-                            <option value="">Select Task</option>
-                            {selectedProject && 
-                              projectsWithTasks
-                                .find(p => p.id === selectedProject)?.tasks
-                                ?.map((task) => (
-                                  <option key={task.id} value={task.id}>
-                                    {task.name}
-                                  </option>
-                                ))
-                            }
-                          </select>
+                      <div className="space-y-4 w-full max-w-sm">
+                        <div className="space-y-3">
+                          <div>
+                            <select
+                              value={selectedProject}
+                              onChange={(e) => {
+                                setSelectedProject(e.target.value);
+                                // Clear the task selection when project changes
+                                setSelectedTask("");
+                              }}
+                              className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm w-full transition-colors ${
+                                selectedProject 
+                                  ? 'border-indigo-500 bg-indigo-50 shadow-sm' 
+                                  : 'border-gray-300 hover:border-gray-400'
+                              }`}
+                            >
+                              <option value="">Select Project</option>
+                              {projectsWithTasks.map((project) => (
+                                <option key={project.id} value={project.id}>
+                                  {project.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <select
+                              value={selectedTask}
+                              onChange={(e) => setSelectedTask(e.target.value)}
+                              className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm w-full transition-colors ${
+                                selectedTask 
+                                  ? 'border-indigo-500 bg-indigo-50 shadow-sm' 
+                                  : 'border-gray-300 hover:border-gray-400'
+                              } ${!selectedProject ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              disabled={!selectedProject}
+                            >
+                              <option value="">Select Task</option>
+                              {selectedProject && 
+                                projectsWithTasks
+                                  .find(p => p.id === selectedProject)?.tasks
+                                  ?.map((task) => (
+                                    <option key={task.id} value={task.id}>
+                                      {task.name}
+                                    </option>
+                                  ))
+                              }
+                            </select>
+                          </div>
                         </div>
+                        
+
+                        
                         <Button
                           onClick={handleStartTimer}
                           disabled={!selectedProject || !selectedTask}
-                          className="bg-green-600 hover:bg-green-700 text-white shadow-lg w-full px-4 py-2"
+                          className={`w-full px-4 py-3 font-medium transition-all duration-200 ${
+                            selectedProject && selectedTask
+                              ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                          }`}
                         >
-                          <Play className="h-4 w-4 mr-2" />
-                          Start Timer
+                          <Play className={`h-4 w-4 mr-2 ${selectedProject && selectedTask ? 'animate-pulse' : ''}`} />
+                          {!selectedProject && !selectedTask
+                            ? 'Select Project & Task'
+                            : !selectedProject
+                            ? 'Select Project'
+                            : !selectedTask
+                            ? 'Select Task'
+                            : 'Start Timer'
+                          }
                         </Button>
                       </div>
                     ) : (
@@ -596,6 +807,20 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-in slide-in-from-right duration-300">
+          <span className="text-lg">🎉</span>
+          <span className="font-medium">{toastMessage}</span>
+          <button
+            onClick={() => setShowToast(false)}
+            className="ml-2 text-white hover:text-gray-200 transition-colors"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   );
 }

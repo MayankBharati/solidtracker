@@ -327,3 +327,21 @@ ipcMain.on('start-screenshots', (event, employeeId) => {
 ipcMain.on('stop-screenshots', () => {
   stopScreenshots();
 });
+
+// Notification handler for new tasks
+ipcMain.on('show-notification', (event, notificationData) => {
+  const { title, body, icon } = notificationData;
+  
+  // Create a native notification
+  const notification = new (require('electron').Notification)({
+    title: title || 'SolidTracker',
+    body: body || 'You have new tasks assigned!',
+    icon: icon || '🎯',
+    silent: false,
+    timeoutType: 'default'
+  });
+  
+  notification.show();
+  
+  console.log('🔔 Notification sent:', { title, body, icon });
+});
