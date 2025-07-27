@@ -39,6 +39,25 @@ export interface Employee {
   updated_at: string;
 }
 
+export interface Team {
+  id: string;
+  name: string;
+  description?: string;
+  organization_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TeamAssignment {
+  id: string;
+  employee_id: string;
+  team_id: string;
+  role: "member" | "lead" | "manager";
+  created_at: string;
+  employee?: Employee;
+  team?: Team;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -56,20 +75,6 @@ export interface Task {
   status: "Pending" | "Completed";
   created_at: string;
   updated_at: string;
-}
-
-export interface ProjectAssignment {
-  id: string;
-  employee_id: string;
-  project_id: string;
-  created_at: string;
-}
-
-export interface TaskAssignment {
-  id: string;
-  employee_id: string;
-  task_id: string;
-  created_at: string;
 }
 
 export interface TimeEntry {
@@ -110,6 +115,71 @@ export interface Admin {
   name: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface TimeOffRequest {
+  id: string;
+  employee_id: string;
+  type: "vacation" | "sick_leave" | "personal" | "other";
+  start_date: string;
+  end_date: string;
+  reason?: string;
+  status: "pending" | "approved" | "rejected";
+  approved_by?: string;
+  created_at: string;
+  updated_at: string;
+  employee?: Employee;
+}
+
+export interface ProductivityScore {
+  id: string;
+  employee_id: string;
+  date: string;
+  productive_time: number;
+  unproductive_time: number;
+  neutral_time: number;
+  total_time: number;
+  productivity_score: number;
+  created_at: string;
+  updated_at: string;
+  employee?: Employee;
+}
+
+export interface AppUsageLog {
+  id: string;
+  employee_id: string;
+  app_name: string;
+  window_title?: string;
+  url?: string;
+  start_time: string;
+  end_time?: string;
+  duration?: number;
+  productivity_type: "productive" | "unproductive" | "neutral" | "unreviewed";
+  created_at: string;
+  employee?: Employee;
+}
+
+export interface IdleTimeLog {
+  id: string;
+  employee_id: string;
+  start_time: string;
+  end_time?: string;
+  duration?: number;
+  created_at: string;
+  employee?: Employee;
+}
+
+export interface Report {
+  id: string;
+  name: string;
+  type: "time_summary" | "productivity" | "employee_performance" | "project_analytics";
+  filters?: any;
+  generated_by?: string;
+  file_path?: string;
+  status: "generating" | "completed" | "failed";
+  created_at: string;
+  completed_at?: string;
+  employee?: Employee;
 }
 
 // Database configuration

@@ -244,6 +244,35 @@ export default function DashboardPage() {
             </Card>
           </Link>
 
+          <Link href="/teams" className="group">
+            <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-white/70 backdrop-blur-sm group-hover:scale-[1.02]">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-xl font-bold text-gray-900">Team Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  Organize employees into teams, assign roles, and manage team hierarchies.
+                </p>
+                <div className="flex items-center space-x-4 text-sm">
+                  <span className="flex items-center text-indigo-600">
+                    <UserCheck className="h-4 w-4 mr-1" />
+                    Team Structure
+                  </span>
+                  <span className="flex items-center text-gray-500">
+                    <Users className="h-4 w-4 mr-1" />
+                    Role Management
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
           <Link href="/projects" className="group">
             <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-white/70 backdrop-blur-sm group-hover:scale-[1.02]">
               <CardHeader className="pb-4">
@@ -267,6 +296,35 @@ export default function DashboardPage() {
                   <span className="flex items-center text-gray-500">
                     <FolderOpen className="h-4 w-4 mr-1" />
                     {stats.totalProjects} Total
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/productivity" className="group">
+            <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-white/70 backdrop-blur-sm group-hover:scale-[1.02]">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-xl font-bold text-gray-900">Productivity Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  Track employee productivity scores, app usage patterns, and performance metrics.
+                </p>
+                <div className="flex items-center space-x-4 text-sm">
+                  <span className="flex items-center text-green-600">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    Performance
+                  </span>
+                  <span className="flex items-center text-gray-500">
+                    <BarChart3 className="h-4 w-4 mr-1" />
+                    Analytics
                   </span>
                 </div>
               </CardContent>

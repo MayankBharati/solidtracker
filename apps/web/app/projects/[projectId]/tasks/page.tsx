@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@time-tracker/ui";
 import { database } from "@time-tracker/api";
-import { Employee, Task, Project, TaskAssignment } from "@time-tracker/db";
+import { Employee, Task, Project } from "@time-tracker/db";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {

@@ -141,7 +141,7 @@ By the end of this guide, you'll have:
 ### Step 5: Test Database Connection (2 minutes)
 
 1. **Start SolidTracker**
-   ```bash
+```bash
    npm run dev:web
    ```
 

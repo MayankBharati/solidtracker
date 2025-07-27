@@ -1,6 +1,6 @@
 {
   "name": "desktop",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "SolidTracker Desktop App",
   "author": "SolidTracker Team",
   "private": true,
@@ -8,8 +8,9 @@
     "start": "electron .",
     "dev": "electron .",
     "build:web": "node build-web.js",
-    "build:electron": "npx electron-builder",
+    "build:electron": "npx electron-builder --win --config.npmRebuild=false --config.nodeGypRebuild=false --config.forceCodeSigning=false",
     "build": "npm run build:web && npm run build:electron",
+    "build:desktop": "npm run build:web && npm run build:electron",
     "build:win": "npm run build:web && npx electron-builder --win --config.npmRebuild=false --config.nodeGypRebuild=false",
     "build:mac": "npm run build:web && npx electron-builder --mac",
     "build:linux": "npm run build:web && npx electron-builder --linux",
@@ -40,6 +41,9 @@
     "npmRebuild": false,
     "nodeGypRebuild": false,
     "buildDependenciesFromSource": false,
+    "forceCodeSigning": false,
+    "cscLink": null,
+    "cscKeyPassword": null,
     "directories": {
       "output": "dist"
     },
@@ -51,7 +55,8 @@
       "package.json"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "mac": {
       "target": "dmg",

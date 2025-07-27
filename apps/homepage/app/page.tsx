@@ -1,6 +1,3 @@
-"use client";
-
-import { Button } from "@time-tracker/ui";
 import { Clock, Users, Monitor, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
@@ -21,26 +18,27 @@ export default function HomePage() {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Button 
-            size="lg"
-            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-            onClick={() => window.open('https://solidtracker-admin.vercel.app', '_blank')}
+          <a 
+            href="https://solidtracker-admin.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <Users className="h-5 w-5 mr-2" />
             Admin Dashboard
             <ArrowRight className="h-5 w-5 ml-2" />
-          </Button>
+          </a>
           
-          <Button 
-            variant="outline"
-            size="lg"
-            className="border-2 border-orange-300 text-orange-600 hover:bg-orange-50 font-semibold px-8 py-4 text-lg rounded-xl transition-all duration-300"
-            onClick={() => window.open('https://solidtracker-employee.vercel.app', '_blank')}
+          <a 
+            href="https://solidtracker-employee.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center border-2 border-orange-300 text-orange-600 hover:bg-orange-50 font-semibold px-8 py-4 text-lg rounded-xl transition-all duration-300"
           >
             <Monitor className="h-5 w-5 mr-2" />
             Employee Portal
             <ArrowRight className="h-5 w-5 ml-2" />
-          </Button>
+          </a>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">

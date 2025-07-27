@@ -8,7 +8,7 @@ export const auth = {
   },
 
   // Supabase handles authentication, but we can add helper methods
-  getCurrentUser: async () => {
+  getCurrentUser: async (): Promise<any> => {
     if (!supabase) return null;
     const {
       data: { user },
@@ -764,5 +764,582 @@ export const database = {
       .order("started_at", { ascending: false });
 
     return { data, error };
+  },
+
+  // Teams
+  async getTeams() {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("teams")
+      .select("*")
+      .order("name", { ascending: true });
+    return { data, error };
+  },
+
+  async createTeam(team: { name: string; description?: string }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("teams")
+      .insert([team])
+      .select();
+    return { data, error };
+  },
+
+  async assignEmployeeToTeam(employeeId: string, teamId: string, role: string = "member") {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("team_assignments")
+      .insert([{ employee_id: employeeId, team_id: teamId, role }])
+      .select("*, employee:employees(*), team:teams(*)");
+    return { data, error };
+  },
+
+  async getEmployeeTeams(employeeId: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("team_assignments")
+      .select("*, team:teams(*)")
+      .eq("employee_id", employeeId);
+    return { data, error };
+  },
+
+  async getTeamAssignments(teamId: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("team_assignments")
+      .select("*, employee:employees(*)")
+      .eq("team_id", teamId);
+    return { data, error };
+  },
+
+  // Time Off Requests
+  async createTimeOffRequest(request: {
+    employee_id: string;
+    type: string;
+    start_date: string;
+    end_date: string;
+    reason?: string;
+  }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("time_off_requests")
+      .insert([request])
+      .select("*, employee:employees(*)");
+    return { data, error };
+  },
+
+  async getTimeOffRequests(employeeId?: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    let query = supabase
+      .from("time_off_requests")
+      .select("*, employee:employees(*)")
+      .order("created_at", { ascending: false });
+
+    if (employeeId) {
+      query = query.eq("employee_id", employeeId);
+    }
+
+    const { data, error } = await query;
+    return { data, error };
+  },
+
+  async updateTimeOffRequest(requestId: string, updates: { status: string; approved_by?: string }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("time_off_requests")
+      .update(updates)
+      .eq("id", requestId)
+      .select("*, employee:employees(*)");
+    return { data, error };
+  },
+
+  // Productivity Tracking
+  async logAppUsage(log: {
+    employee_id: string;
+    app_name: string;
+    window_title?: string;
+    url?: string;
+    start_time: string;
+    end_time?: string;
+    duration?: number;
+    productivity_type?: string;
+  }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("app_usage_logs")
+      .insert([log])
+      .select();
+    return { data, error };
+  },
+
+  async logIdleTime(log: {
+    employee_id: string;
+    start_time: string;
+    end_time?: string;
+    duration?: number;
+  }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("idle_time_logs")
+      .insert([log])
+      .select();
+    return { data, error };
+  },
+
+  async updateProductivityScore(score: {
+    employee_id: string;
+    date: string;
+    productive_time: number;
+    unproductive_time: number;
+    neutral_time: number;
+    total_time: number;
+    productivity_score: number;
+  }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("productivity_scores")
+      .upsert([score], { onConflict: "employee_id,date" })
+      .select("*, employee:employees(*)");
+    return { data, error };
+  },
+
+  async getProductivityScores(employeeId?: string, startDate?: string, endDate?: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    let query = supabase
+      .from("productivity_scores")
+      .select("*, employee:employees(*)")
+      .order("date", { ascending: false });
+
+    if (employeeId) {
+      query = query.eq("employee_id", employeeId);
+    }
+    if (startDate) {
+      query = query.gte("date", startDate);
+    }
+    if (endDate) {
+      query = query.lte("date", endDate);
+    }
+
+    const { data, error } = await query;
+    return { data, error };
+  },
+
+  async getAppUsageLogs(employeeId?: string, startDate?: string, endDate?: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    let query = supabase
+      .from("app_usage_logs")
+      .select("*, employee:employees(*)")
+      .order("start_time", { ascending: false });
+
+    if (employeeId) {
+      query = query.eq("employee_id", employeeId);
+    }
+    if (startDate) {
+      query = query.gte("start_time", startDate);
+    }
+    if (endDate) {
+      query = query.lte("start_time", endDate);
+    }
+
+    const { data, error } = await query;
+    return { data, error };
+  },
+
+  // Reports
+  async generateReport(report: {
+    name: string;
+    type: string;
+    filters?: any;
+    generated_by: string;
+  }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("reports")
+      .insert([report])
+      .select();
+    return { data, error };
+  },
+
+  async getReports(generatedBy?: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    let query = supabase
+      .from("reports")
+      .select("*, employee:employees(*)")
+      .order("created_at", { ascending: false });
+
+    if (generatedBy) {
+      query = query.eq("generated_by", generatedBy);
+    }
+
+    const { data, error } = await query;
+    return { data, error };
+  },
+
+  async updateReportStatus(reportId: string, status: string, filePath?: string) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const updates: any = { status };
+    if (status === "completed") {
+      updates.completed_at = new Date().toISOString();
+    }
+    if (filePath) {
+      updates.file_path = filePath;
+    }
+
+    const { data, error } = await supabase
+      .from("reports")
+      .update(updates)
+      .eq("id", reportId)
+      .select("*, employee:employees(*)");
+    return { data, error };
+  },
+
+  // Productivity Calculation
+  async calculateProductivityScore(employeeId: string, date: string) {
+    if (!supabase) return { data: null, error: { message: "Supabase not configured" } };
+
+    try {
+      // Get all time entries for the employee on the specified date
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const { data: timeEntries, error: timeError } = await supabase
+        .from("time_entries")
+        .select("*")
+        .eq("employee_id", employeeId)
+        .gte("started_at", startOfDay.toISOString())
+        .lte("started_at", endOfDay.toISOString());
+
+      if (timeError) throw timeError;
+
+      // Get app usage logs for the same period
+      const { data: appLogs, error: appError } = await supabase
+        .from("app_usage_logs")
+        .select("*")
+        .eq("employee_id", employeeId)
+        .gte("start_time", startOfDay.toISOString())
+        .lte("start_time", endOfDay.toISOString());
+
+      if (appError) throw appError;
+
+      // Get idle time logs for the same period
+      const { data: idleLogs, error: idleError } = await supabase
+        .from("idle_time_logs")
+        .select("*")
+        .eq("employee_id", employeeId)
+        .gte("start_time", startOfDay.toISOString())
+        .lte("start_time", endOfDay.toISOString());
+
+      if (idleError) throw idleError;
+
+      // Calculate productivity metrics
+      let totalWorkTime = 0;
+      let productiveTime = 0;
+      let unproductiveTime = 0;
+      let neutralTime = 0;
+      let totalIdleTime = 0;
+
+      // Calculate total work time from time entries
+      timeEntries?.forEach(entry => {
+        if (entry.ended_at && entry.duration) {
+          totalWorkTime += entry.duration;
+        }
+      });
+
+      // Calculate app usage productivity
+      appLogs?.forEach(log => {
+        const duration = log.duration || 0;
+        switch (log.productivity_type) {
+          case 'productive':
+            productiveTime += duration;
+            break;
+          case 'unproductive':
+            unproductiveTime += duration;
+            break;
+          case 'neutral':
+          default:
+            neutralTime += duration;
+            break;
+        }
+      });
+
+      // Calculate idle time
+      idleLogs?.forEach(log => {
+        if (log.duration) {
+          totalIdleTime += log.duration;
+        }
+      });
+
+      // Calculate productivity score
+      const totalActiveTime = productiveTime + unproductiveTime + neutralTime;
+      const productivityScore = totalActiveTime > 0 
+        ? Math.round((productiveTime / totalActiveTime) * 100)
+        : 0;
+
+      // Update or create productivity score record
+      const scoreData = {
+        employee_id: employeeId,
+        date: date,
+        productive_time: productiveTime,
+        unproductive_time: unproductiveTime,
+        neutral_time: neutralTime,
+        total_time: totalWorkTime,
+        productivity_score: productivityScore
+      };
+
+      const { data, error } = await supabase
+        .from("productivity_scores")
+        .upsert([scoreData], { onConflict: "employee_id,date" })
+        .select("*, employee:employees(*)");
+
+      return { data, error };
+    } catch (error) {
+      console.error("Error calculating productivity score:", error);
+      return { data: null, error: { message: "Failed to calculate productivity score" } };
+    }
+  },
+
+  async calculateAllProductivityScores(startDate?: string, endDate?: string) {
+    if (!supabase) return { data: null, error: { message: "Supabase not configured" } };
+
+    try {
+      // Get all active employees
+      const { data: employees, error: empError } = await supabase
+        .from("employees")
+        .select("id")
+        .eq("status", "active");
+
+      if (empError) throw empError;
+
+      const results = [];
+      const start = startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const end = endDate || new Date().toISOString().split('T')[0];
+
+      if (!start || !end) {
+        return { data: null, error: { message: "Invalid date range" } };
+      }
+
+      // Calculate scores for each employee for each day in the range
+      for (const employee of employees || []) {
+        if (!employee.id) continue; // Skip if no ID
+        
+        const currentDate = new Date(start);
+        const endDateObj = new Date(end);
+
+        while (currentDate <= endDateObj) {
+          const dateStr = currentDate.toISOString().split('T')[0];
+          const result = await this.calculateProductivityScore(employee.id as string, dateStr);
+          if (result.data) {
+            results.push(result.data[0]);
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      }
+
+      return { data: results, error: null };
+    } catch (error) {
+      console.error("Error calculating all productivity scores:", error);
+      return { data: null, error: { message: "Failed to calculate productivity scores" } };
+    }
+  },
+
+  // Generate realistic productivity data from time entries
+  async generateProductivityDataFromTimeEntries(employeeId: string, date: string) {
+    if (!supabase) return { data: null, error: { message: "Supabase not configured" } };
+
+    try {
+      // Get time entries for the employee on the specified date
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const { data: timeEntries, error: timeError } = await supabase
+        .from("time_entries")
+        .select("*")
+        .eq("employee_id", employeeId)
+        .gte("started_at", startOfDay.toISOString())
+        .lte("started_at", endOfDay.toISOString());
+
+      if (timeError) throw timeError;
+
+      if (!timeEntries || timeEntries.length === 0) {
+        return { data: null, error: { message: "No time entries found for this date" } };
+      }
+
+      // Calculate total work time
+      let totalWorkTime = 0;
+      timeEntries.forEach(entry => {
+        if (entry.ended_at && entry.duration) {
+          totalWorkTime += entry.duration;
+        }
+      });
+
+      if (totalWorkTime === 0) {
+        return { data: null, error: { message: "No completed time entries found" } };
+      }
+
+      // Generate realistic app usage data based on work time
+      const appUsageData = [
+        {
+          app_name: "Visual Studio Code",
+          productivity_type: "productive",
+          duration: Math.floor(totalWorkTime * 0.6), // 60% productive
+          window_title: "Coding - Project Files"
+        },
+        {
+          app_name: "Google Chrome",
+          productivity_type: "neutral",
+          duration: Math.floor(totalWorkTime * 0.25), // 25% neutral
+          window_title: "Documentation & Research"
+        },
+        {
+          app_name: "Slack",
+          productivity_type: "productive",
+          duration: Math.floor(totalWorkTime * 0.1), // 10% productive
+          window_title: "Team Communication"
+        },
+        {
+          app_name: "Spotify",
+          productivity_type: "neutral",
+          duration: Math.floor(totalWorkTime * 0.05), // 5% neutral
+          window_title: "Background Music"
+        }
+      ];
+
+      // Insert app usage logs
+      for (const appData of appUsageData) {
+        if (appData.duration > 0) {
+          await this.logAppUsage({
+            employee_id: employeeId,
+            app_name: appData.app_name,
+            window_title: appData.window_title,
+            start_time: startOfDay.toISOString(),
+            end_time: endOfDay.toISOString(),
+            duration: appData.duration,
+            productivity_type: appData.productivity_type as any
+          });
+        }
+      }
+
+      // Generate some idle time (10% of work time)
+      const idleTime = Math.floor(totalWorkTime * 0.1);
+      if (idleTime > 0) {
+        await this.logIdleTime({
+          employee_id: employeeId,
+          start_time: startOfDay.toISOString(),
+          end_time: endOfDay.toISOString(),
+          duration: idleTime
+        });
+      }
+
+      // Calculate productivity metrics
+      let productiveTime = 0;
+      let unproductiveTime = 0;
+      let neutralTime = 0;
+
+      appUsageData.forEach(app => {
+        switch (app.productivity_type) {
+          case 'productive':
+            productiveTime += app.duration;
+            break;
+          case 'unproductive':
+            unproductiveTime += app.duration;
+            break;
+          case 'neutral':
+          default:
+            neutralTime += app.duration;
+            break;
+        }
+      });
+
+      // Calculate productivity score
+      const totalActiveTime = productiveTime + unproductiveTime + neutralTime;
+      const productivityScore = totalActiveTime > 0 
+        ? Math.round((productiveTime / totalActiveTime) * 100)
+        : 0;
+
+      // Update or create productivity score record
+      const scoreData = {
+        employee_id: employeeId,
+        date: date,
+        productive_time: productiveTime,
+        unproductive_time: unproductiveTime,
+        neutral_time: neutralTime,
+        total_time: totalWorkTime,
+        productivity_score: productivityScore
+      };
+
+      const { data, error } = await supabase
+        .from("productivity_scores")
+        .upsert([scoreData], { onConflict: "employee_id,date" })
+        .select("*, employee:employees(*)");
+
+      return { data, error };
+    } catch (error) {
+      console.error("Error generating productivity data:", error);
+      return { data: null, error: { message: "Failed to generate productivity data" } };
+    }
+  },
+
+  async generateAllProductivityDataFromTimeEntries(startDate?: string, endDate?: string) {
+    if (!supabase) return { data: null, error: { message: "Supabase not configured" } };
+
+    try {
+      // Get all active employees
+      const { data: employees, error: empError } = await supabase
+        .from("employees")
+        .select("id")
+        .eq("status", "active");
+
+      if (empError) throw empError;
+
+      const results = [];
+      const start = startDate || new Date().toISOString().split('T')[0];
+      const end = endDate || new Date().toISOString().split('T')[0];
+
+      if (!start || !end) {
+        return { data: null, error: { message: "Invalid date range" } };
+      }
+
+      // Generate data for each employee for each day in the range
+      for (const employee of employees || []) {
+        if (!employee.id) continue;
+        
+        const currentDate = new Date(start);
+        const endDateObj = new Date(end);
+
+        while (currentDate <= endDateObj) {
+          const dateStr = currentDate.toISOString().split('T')[0];
+          const result = await this.generateProductivityDataFromTimeEntries(employee.id, dateStr);
+          if (result.data) {
+            results.push(result.data[0]);
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      }
+
+      return { data: results, error: null };
+    } catch (error) {
+      console.error("Error generating all productivity data:", error);
+      return { data: null, error: { message: "Failed to generate productivity data" } };
+    }
   },
 };

@@ -18,6 +18,25 @@
         "SMTP_PASSWORD",
         "PASS",
         "NODE_ENV"
+      ],
+      "cache": true
+    },
+    "build:desktop": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"],
+      "env": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY", 
+        "NEXT_PUBLIC_APP_URL",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "EMAIL_FROM",
+        "SMTP_HOST",
+        "SMTP_PORT", 
+        "SMTP_USER",
+        "SMTP_PASSWORD",
+        "PASS",
+        "NODE_ENV"
       ]
     },
     "lint": {
