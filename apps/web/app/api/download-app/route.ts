@@ -13,7 +13,7 @@ const DESKTOP_APPS = {
     fileName: 'SolidTracker-1.3.0-arm64-mac.zip',
     fileSize: '229 MB',
     supported: true,
-    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.3.1/SolidTracker-1.3.0-arm64-mac.zip'
+    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.3.2/SolidTracker-1.3.0-arm64-mac.zip'
   },
   linux: {
     fileName: 'SolidTracker.1.2.0.AppImage', 

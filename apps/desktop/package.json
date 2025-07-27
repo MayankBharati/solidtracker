@@ -73,7 +73,9 @@
       "compression": "store",
       "asar": false,
       "icon": null,
-      "category": "public.app-category.productivity"
+      "category": "public.app-category.productivity",
+      "notarize": false,
+      "type": "distribution"
     },
     "linux": {
       "target": "AppImage"
