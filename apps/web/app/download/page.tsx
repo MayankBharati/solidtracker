@@ -144,6 +144,37 @@ export default function DownloadPage() {
           ))}
         </div>
 
+        {/* macOS Installation Instructions */}
+        <Card className="max-w-4xl mx-auto border-0 bg-white/70 backdrop-blur-sm mb-8">
+          <CardHeader>
+            <CardTitle className="text-center flex items-center justify-center">
+              <Apple className="h-6 w-6 mr-2 text-orange-600" />
+              macOS Installation Guide
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <p className="text-sm text-orange-800 mb-3 font-medium">
+                <strong>Important:</strong> Due to macOS security features, you may see an "app is damaged" warning. This is normal for unsigned apps.
+              </p>
+              <div className="text-sm text-gray-700 space-y-2">
+                <p className="font-semibold">To install on macOS:</p>
+                <ol className="list-decimal list-inside space-y-1 ml-4">
+                  <li>Download and extract the ZIP file</li>
+                  <li>If you see "app is damaged" warning:</li>
+                  <li className="ml-4">• <strong>Method 1:</strong> Right-click on SolidTracker.app and select "Open"</li>
+                  <li className="ml-4">• <strong>Method 2:</strong> Open Terminal and run: <code className="bg-gray-100 px-1 rounded">xattr -cr /path/to/SolidTracker.app</code></li>
+                  <li>Click "Open" in the security dialog if prompted</li>
+                  <li>The app will run normally after the first approval</li>
+                </ol>
+                <p className="text-xs text-gray-500 mt-3">
+                  This happens because the app isn't code-signed by Apple, which is common for Electron apps. The app is safe to use.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Features Section */}
         <div className="grid md:grid-cols-3 gap-8 mb-12 max-w-4xl mx-auto">
           <div className="text-center">

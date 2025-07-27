@@ -13,7 +13,15 @@ const DESKTOP_APPS = {
     fileName: 'SolidTracker-1.3.0-arm64-mac.zip',
     fileSize: '229 MB',
     supported: true,
-    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.3.2/SolidTracker-1.3.0-arm64-mac.zip'
+    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.3.2/SolidTracker-1.3.0-arm64-mac.zip',
+    installationInstructions: [
+      '1. Download and extract the ZIP file',
+      '2. If you see "app is damaged" warning:',
+      '   • Right-click on SolidTracker.app and select "Open"',
+      '   • OR: Open Terminal and run: xattr -cr /path/to/SolidTracker.app',
+      '3. Click "Open" in the security dialog if prompted',
+      '4. The app will run normally after the first approval'
+    ]
   },
   linux: {
     fileName: 'SolidTracker.1.2.0.AppImage', 
