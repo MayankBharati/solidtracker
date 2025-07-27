@@ -18,7 +18,6 @@ export function ActivateForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [activated, setActivated] = useState(false);
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -110,42 +109,9 @@ export function ActivateForm() {
     }
   };
 
-  const handleDownloadApp = async () => {
-    if (!employee) return;
-    
-    setDownloadLoading(true);
-    try {
-      const response = await fetch('/api/download-app', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          employeeId: employee.id
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to prepare download');
-      }
-
-      // Trigger download
-      const link = document.createElement('a');
-      link.href = data.downloadUrl;
-      link.download = data.fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success('Desktop app download started!');
-    } catch (err) {
-      console.error('Download failed:', err);
-      toast.error('Failed to download app. Please try again.');
-    } finally {
-      setDownloadLoading(false);
-    }
+  const handleDownloadApp = () => {
+    // Redirect to downloads page instead of direct download
+    router.push('/download');
   };
 
   if (verifying) {
@@ -212,20 +178,19 @@ export function ActivateForm() {
                 </p>
                 <Button 
                   onClick={handleDownloadApp}
-                  disabled={downloadLoading}
                   className="w-full bg-green-600 hover:bg-green-700 mb-3"
                 >
-                  {downloadLoading ? "Preparing Download..." : "Download Desktop App"}
+                  Download Desktop App
                 </Button>
                 
                 <div className="text-xs text-green-700 bg-green-100 p-2 rounded border">
-                  <p className="font-semibold mb-1">📋 macOS Installation Instructions:</p>
+                  <p className="font-semibold mb-1">📋 Installation Instructions:</p>
                   <ol className="list-decimal list-inside space-y-1 text-xs">
-                    <li>After download, open the DMG file</li>
-                    <li>If you see "App is damaged" warning:</li>
-                    <li className="ml-4">• Right-click the app and select "Open"</li>
-                    <li className="ml-4">• OR: Go to System Settings → Privacy & Security → Allow app</li>
-                    <li>The app will run normally after the first approval</li>
+                    <li>Click "Download Desktop App" to go to downloads page</li>
+                    <li>Choose your operating system (Windows/macOS/Linux)</li>
+                    <li>Download and install the app</li>
+                    <li>For macOS: Extract ZIP and drag app to Applications</li>
+                    <li>For Windows: Run the installer</li>
                   </ol>
                 </div>
               </div>

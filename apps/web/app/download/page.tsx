@@ -41,9 +41,8 @@ export default function DownloadPage() {
       name: "macOS",
       icon: <Apple className="h-8 w-8" />,
       downloadUrl: "/api/download-app?platform=mac",
-      fileSize: "~85 MB",
-      supported: false,
-      comingSoon: true,
+      fileSize: "239 MB",
+      supported: true,
     },
     {
       name: "Linux",
