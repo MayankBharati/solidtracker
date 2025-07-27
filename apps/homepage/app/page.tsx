@@ -20,32 +20,32 @@ import {
 export default function HomePage() {
   const features = [
     {
-      icon: <Clock className="h-6 w-6" />,
+      icon: Clock,
       title: "Real-time Tracking",
       description: "Monitor time and productivity in real-time with automatic screenshots"
     },
     {
-      icon: <Users className="h-6 w-6" />,
+      icon: Users,
       title: "Team Management",
       description: "Manage employees, projects, and tasks from a centralized dashboard"
     },
     {
-      icon: <Shield className="h-6 w-6" />,
+      icon: Shield,
       title: "Secure & Private",
       description: "End-to-end encryption with secure data storage and privacy controls"
     },
     {
-      icon: <Zap className="h-6 w-6" />,
+      icon: Zap,
       title: "Lightning Fast",
       description: "Native performance with instant startup and seamless synchronization"
     },
     {
-      icon: <BarChart3 className="h-6 w-6" />,
+      icon: BarChart3,
       title: "Analytics & Reports",
       description: "Comprehensive reports and insights for better decision making"
     },
     {
-      icon: <Activity className="h-6 w-6" />,
+      icon: Activity,
       title: "Productivity Monitoring",
       description: "Track application usage, websites visited, and productivity metrics"
     }
@@ -53,19 +53,19 @@ export default function HomePage() {
 
   const platforms = [
     {
-      icon: <Monitor className="h-8 w-8" />,
+      icon: Monitor,
       title: "Desktop App",
       description: "Windows, Mac, Linux support with offline capabilities",
       status: "Available"
     },
     {
-      icon: <Globe className="h-8 w-8" />,
+      icon: Globe,
       title: "Web Portal",
       description: "Access from any browser, no installation required",
       status: "Available"
     },
     {
-      icon: <Smartphone className="h-8 w-8" />,
+      icon: Smartphone,
       title: "Mobile App",
       description: "iOS and Android apps for on-the-go tracking",
       status: "Coming Soon"
@@ -140,17 +140,20 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-gray-200 p-6">
-                <div className="text-center pb-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-600 rounded-2xl mb-4">
-                    {feature.icon}
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <div key={index} className="bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-gray-200 p-6">
+                  <div className="text-center pb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-600 rounded-2xl mb-4">
+                      <IconComponent className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                    <p className="text-gray-600">{feature.description}</p>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -168,41 +171,44 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {platforms.map((platform, index) => (
-              <div key={index} className="bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-gray-200 p-6">
-                <div className="text-center pb-4">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-600 rounded-3xl mb-4">
-                    {platform.icon}
+            {platforms.map((platform, index) => {
+              const IconComponent = platform.icon;
+              return (
+                <div key={index} className="bg-white/70 backdrop-blur-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-gray-200 p-6">
+                  <div className="text-center pb-4">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-600 rounded-3xl mb-4">
+                      <IconComponent className="h-8 w-8" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{platform.title}</h3>
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        platform.status === 'Available' 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {platform.status}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mb-4">{platform.description}</p>
+                    {platform.status === 'Available' && (
+                      <button 
+                        className="w-full border border-orange-300 text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-lg transition-colors"
+                        onClick={() => {
+                          if (platform.title === 'Desktop App') {
+                            window.open('https://solidtracker-admin.vercel.app/download', '_blank');
+                          } else if (platform.title === 'Web Portal') {
+                            window.open('https://solidtracker-employee.vercel.app', '_blank');
+                          }
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-2 inline" />
+                        {platform.title === 'Desktop App' ? 'Download' : 'Access'}
+                      </button>
+                    )}
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{platform.title}</h3>
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      platform.status === 'Available' 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {platform.status}
-                    </span>
-                  </div>
-                  <p className="text-gray-600 mb-4">{platform.description}</p>
-                  {platform.status === 'Available' && (
-                    <button 
-                      className="w-full border border-orange-300 text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-lg transition-colors"
-                      onClick={() => {
-                        if (platform.title === 'Desktop App') {
-                          window.open('https://solidtracker-admin.vercel.app/download', '_blank');
-                        } else if (platform.title === 'Web Portal') {
-                          window.open('https://solidtracker-employee.vercel.app', '_blank');
-                        }
-                      }}
-                    >
-                      <Download className="h-4 w-4 mr-2 inline" />
-                      {platform.title === 'Desktop App' ? 'Download' : 'Access'}
-                    </button>
-                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
