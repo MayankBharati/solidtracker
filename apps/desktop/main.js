@@ -264,7 +264,7 @@ async function takeScreenshot() {
 
 async function uploadScreenshot(buffer, filename) {
   try {
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage first (for local storage)
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('screenshots')
       .upload(filename, buffer, {
@@ -281,21 +281,74 @@ async function uploadScreenshot(buffer, filename) {
       .from('screenshots')
       .getPublicUrl(filename);
 
+    // Get current time entry if any
+    const { data: activeTimeEntry } = await supabase
+      .from('time_entries')
+      .select('id, project_id, task_id')
+      .eq('employee_id', currentEmployeeId)
+      .is('ended_at', null)
+      .single();
+
     // Save screenshot record to database
-    const { error: dbError } = await supabase
+    const { data: screenshotRecord, error: dbError } = await supabase
       .from('screenshots')
       .insert({
         employee_id: currentEmployeeId,
         file_path: publicUrlData.publicUrl,
+        time_entry_id: activeTimeEntry?.id || null,
         captured_at: new Date().toISOString(),
         has_permission: true
-      });
+      })
+      .select()
+      .single();
 
     if (dbError) {
       console.error('Failed to save screenshot record:', dbError);
+      return;
     }
+
+    // Sync to Insightful API if enabled
+    await syncScreenshotToInsightful(screenshotRecord.id, buffer);
   } catch (error) {
     console.error('Failed to upload screenshot:', error);
+  }
+}
+
+async function syncScreenshotToInsightful(screenshotId, buffer) {
+  try {
+    // Get Insightful settings
+    const { data: settings } = await supabase
+      .from('insightful_settings')
+      .select('key, value')
+      .in('key', ['api_token', 'sync_enabled']);
+
+    const apiToken = settings?.find(s => s.key === 'api_token')?.value;
+    const syncEnabled = settings?.find(s => s.key === 'sync_enabled')?.value === 'true';
+
+    if (!syncEnabled || !apiToken) {
+      console.log('Insightful sync disabled or not configured');
+      return;
+    }
+
+    // Make API call to sync screenshot
+    const response = await fetch('http://localhost:3000/api/insightful/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'screenshot',
+        entityId: screenshotId
+      })
+    });
+
+    if (!response.ok) {
+      console.error('Failed to sync screenshot to Insightful:', await response.text());
+    } else {
+      console.log('Screenshot synced to Insightful successfully');
+    }
+  } catch (error) {
+    console.error('Error syncing to Insightful:', error);
   }
 }
 

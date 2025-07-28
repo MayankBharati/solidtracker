@@ -35,6 +35,16 @@ export interface Employee {
   activation_token?: string;
   password?: string;
   user_id?: string;
+  title?: string;
+  team_id?: string;
+  shared_settings_id?: string;
+  account_id?: string;
+  identifier?: string;
+  type?: 'personal' | 'office';
+  insightful_id?: string;
+  deactivated_at?: string;
+  invited_at?: string;
+  project_ids?: string[];
   created_at: string;
   updated_at: string;
 }

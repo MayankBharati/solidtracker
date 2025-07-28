@@ -17,7 +17,9 @@
         "SMTP_USER",
         "SMTP_PASSWORD",
         "PASS",
-        "NODE_ENV"
+        "NODE_ENV",
+        "INSIGHTFUL_API_TOKEN",
+        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN"
       ],
       "cache": true
     },
@@ -36,7 +38,9 @@
         "SMTP_USER",
         "SMTP_PASSWORD",
         "PASS",
-        "NODE_ENV"
+        "NODE_ENV",
+        "INSIGHTFUL_API_TOKEN",
+        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN"
       ]
     },
     "lint": {
@@ -59,7 +63,9 @@
         "SMTP_USER",
         "SMTP_PASSWORD",
         "PASS",
-        "NODE_ENV"
+        "NODE_ENV",
+        "INSIGHTFUL_API_TOKEN",
+        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN"
       ]
     }
   }
