@@ -31,6 +31,8 @@ import {
   AlertCircle,
   XCircle,
   UserCheck,
+  RefreshCw,
+  Cloud,
 } from "lucide-react";
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -42,7 +44,14 @@ export default function EmployeesPage() {
   const [resendingEmail, setResendingEmail] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-  const [newEmployee, setNewEmployee] = useState({ name: "", email: "" });
+  const [newEmployee, setNewEmployee] = useState({ 
+    name: "", 
+    email: "", 
+    title: "",
+    team_id: "",
+    type: "personal" as "personal" | "office"
+  });
+  const [syncingEmployees, setSyncingEmployees] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadEmployees();
@@ -68,10 +77,15 @@ export default function EmployeesPage() {
     setAddingEmployee(true);
 
     const activationToken = crypto.randomUUID();
-    const { data, error } = await database.createEmployee({
+    
+    // Clean up the employee data - convert empty strings to null for UUID fields
+    const cleanedEmployee = {
       ...newEmployee,
+      team_id: newEmployee.team_id || null, // Convert empty string to null
       activation_token: activationToken,
-    });
+    };
+    
+    const { data, error } = await database.createEmployee(cleanedEmployee);
 
     if (data) {
       // Send invitation email
@@ -117,7 +131,13 @@ export default function EmployeesPage() {
       }
 
       setEmployees([data[0], ...employees]);
-      setNewEmployee({ name: "", email: "" });
+      setNewEmployee({ 
+        name: "", 
+        email: "", 
+        title: "",
+        team_id: "",
+        type: "personal" as "personal" | "office"
+      });
       setShowAddForm(false);
     }
     setAddingEmployee(false);
@@ -146,6 +166,32 @@ export default function EmployeesPage() {
       if (!error) {
         setEmployees(employees.filter((emp) => emp.id !== id));
       }
+    }
+  };
+
+  const handleSyncEmployee = async (employeeId: string) => {
+    setSyncingEmployees(prev => new Set(prev).add(employeeId));
+    try {
+      const response = await fetch("/api/insightful/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "employee", entityId: employeeId }),
+      });
+
+      if (response.ok) {
+        toast.success("Employee synced to Insightful successfully!");
+      } else {
+        const error = await response.json();
+        toast.error(`Sync failed: ${error.error}`);
+      }
+    } catch (error) {
+      toast.error("Failed to sync employee");
+    } finally {
+      setSyncingEmployees(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(employeeId);
+        return newSet;
+      });
     }
   };
 
@@ -538,6 +584,20 @@ export default function EmployeesPage() {
                               )}
                             </Button>
                           )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSyncEmployee(employee.id)}
+                            disabled={syncingEmployees.has(employee.id)}
+                            className="hover:bg-purple-50 hover:border-purple-200"
+                          >
+                            {syncingEmployees.has(employee.id) ? (
+                              <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                            ) : (
+                              <Cloud className="h-4 w-4 mr-1" />
+                            )}
+                            Sync
+                          </Button>
                           <Button
                             variant="destructive"
                             size="sm"

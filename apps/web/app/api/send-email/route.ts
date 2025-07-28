@@ -12,10 +12,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!process.env.EMAIL_FROM || !process.env.PASS) {
+    if (!process.env.EMAIL_FROM || !process.env.SMTP_PASSWORD) {
       console.error('Missing email configuration:')
       console.error('EMAIL_FROM:', process.env.EMAIL_FROM ? 'present' : 'missing')
-      console.error('PASS:', process.env.PASS ? 'present' : 'missing')
+      console.error('SMTP_PASSWORD:', process.env.SMTP_PASSWORD ? 'present' : 'missing')
       return NextResponse.json(
         { error: 'Email configuration missing' },
         { status: 500 }
@@ -24,14 +24,14 @@ export async function POST(request: NextRequest) {
 
     console.log('Email configuration loaded successfully')
     console.log('EMAIL_FROM:', process.env.EMAIL_FROM)
-    console.log('PASS length:', process.env.PASS?.length)
+    console.log('SMTP_PASSWORD length:', process.env.SMTP_PASSWORD?.length)
 
     // Create transporter using Gmail SMTP with more robust configuration
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_FROM,
-        pass: process.env.PASS
+        pass: process.env.SMTP_PASSWORD
       },
       tls: {
         rejectUnauthorized: false
