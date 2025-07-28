@@ -34,7 +34,7 @@ export default function DownloadPage() {
       name: "Windows",
       icon: <Monitor className="h-8 w-8" />,
       downloadUrl: "/api/download-app?platform=windows",
-      fileSize: "77.7 MB",
+      fileSize: "74 MB",
       supported: true,
     },
     {
