@@ -194,7 +194,7 @@ export function ActivateForm() {
                   </ol>
                   <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
                     <p className="font-semibold text-yellow-800 text-xs">⚠️ macOS Users:</p>
-                    <p className="text-yellow-700 text-xs">If you see "app is damaged" warning, right-click the app and select "Open" or run: <code className="bg-yellow-100 px-1">xattr -cr /path/to/SolidTracker.app</code></p>
+                    <p className="text-yellow-700 text-xs">Download DMG file, mount it, drag to Applications. If you see "app is damaged" warning, right-click the app and select "Open" or run: <code className="bg-yellow-100 px-1">xattr -cr /Applications/SolidTracker.app</code></p>
                   </div>
                 </div>
               </div>

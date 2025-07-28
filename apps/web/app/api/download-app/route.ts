@@ -10,10 +10,20 @@ const DESKTOP_APPS = {
     downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.3.0/SolidTracker-Setup-1.3.0.exe'
   },
   mac: {
-    fileName: 'SolidTracker.1.2.0.dmg',
-    fileSize: '~85 MB',
-    supported: false,
-    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.2.0/SolidTracker.1.2.0.dmg'
+    fileName: 'SolidTracker-1.3.0-arm64.dmg',
+    fileSize: '92 MB',
+    supported: true,
+    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/untagged-686a9c1f7494cc5e55ba/SolidTracker-1.3.0-arm64.dmg',
+    installationInstructions: [
+      '1. Download the DMG file',
+      '2. Double-click the DMG file to mount it',
+      '3. Drag SolidTracker.app to your Applications folder',
+      '4. If you see "app is damaged" warning:',
+      '   • Right-click on SolidTracker.app and select "Open"',
+      '   • OR: Open Terminal and run: xattr -cr /Applications/SolidTracker.app',
+      '5. Click "Open" in the security dialog if prompted',
+      '6. The app will run normally after the first approval'
+    ]
   },
   linux: {
     fileName: 'SolidTracker.1.2.0.AppImage', 
