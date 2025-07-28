@@ -7,13 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@time-tracker/ui";
 import { Input } from "@time-tracker/ui";
 import { Label } from "@time-tracker/ui";
 import { database } from "@time-tracker/api";
-import { Clock, Lock, Mail, User, Timer, BarChart3 } from "lucide-react";
+import { Clock, Lock, Mail, User, Timer, BarChart3, Database } from "lucide-react";
 import Cookies from "js-cookie";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -49,6 +50,53 @@ export default function LoginPage() {
       console.error("Login error:", error);
       setError("An error occurred during login. Please try again.");
       setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setSeeding(true);
+    setError(null);
+
+    try {
+      // Step 1: Seed the database with sample data
+      const seedResponse = await fetch('/api/seed', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!seedResponse.ok) {
+        throw new Error('Failed to seed database');
+      }
+
+      const seedResult = await seedResponse.json();
+      console.log('Seed result:', seedResult);
+
+      // Step 2: Login with the demo employee
+      const { data, error: authError } = await database.signInWithEmployee(
+        'john.doe@example.com',
+        'hashed_password_here'
+      );
+
+      if (!data || authError) {
+        setError("Demo login failed. Please try manual login.");
+        setSeeding(false);
+        return;
+      }
+
+      // Store employee data in cookies
+      Cookies.set("employee-data", JSON.stringify(data), {
+        expires: 1, // Expires in 1 day
+        secure: process.env.NODE_ENV === "production",
+      });
+
+      setSeeding(false);
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Demo login error:", error);
+      setError("Demo setup failed. Please try manual login.");
+      setSeeding(false);
     }
   };
 
@@ -93,6 +141,39 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Demo Login Button */}
+            <div className="mb-6">
+              <Button 
+                onClick={handleDemoLogin} 
+                className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 font-medium text-lg mb-4" 
+                disabled={seeding || loading}
+              >
+                {seeding ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Setting up demo...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center">
+                    <Database className="h-5 w-5 mr-2" />
+                    Demo Login (Auto Setup)
+                  </div>
+                )}
+              </Button>
+              <p className="text-xs text-gray-500 text-center">
+                Creates sample projects and tasks automatically
+              </p>
+            </div>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or sign in manually</span>
+              </div>
+            </div>
+
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700 font-medium">
@@ -133,7 +214,7 @@ export default function LoginPage() {
               <Button 
                 type="submit" 
                 className="w-full h-12 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700 font-medium text-lg" 
-                disabled={loading}
+                disabled={loading || seeding}
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
