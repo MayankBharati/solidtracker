@@ -1,0 +1,10 @@
+{
+  "extends": "@repo/typescript-config/react-library.json",
+  "compilerOptions": {
+    "lib": ["ES2015", "DOM"],
+    "outDir": "./dist",
+    "rootDir": "."
+  },
+  "include": ["."],
+  "exclude": ["dist", "node_modules"]
+} 

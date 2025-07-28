@@ -5,6 +5,8 @@
   "types": "./index.ts",
   "dependencies": {
     "@time-tracker/db": "*",
-    "@supabase/supabase-js": "^2.38.5"
+    "@supabase/supabase-js": "^2.38.5",
+    "axios": "^1.6.0",
+    "crypto-js": "^4.2.0"
   }
 }

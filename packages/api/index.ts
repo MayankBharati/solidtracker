@@ -3,6 +3,10 @@ import crypto from "crypto";
 import { HmacSHA1 } from "crypto-js";
 import { collectAndLogBackgroundInfo, DeviceInfo } from "./background-info";
 
+// Export Insightful API integration
+export * from "./insightful-client";
+export * from "./insightful-integration";
+
 export const auth = {
   generateActivationToken: (): string => {
     return crypto.randomBytes(32).toString("hex");
@@ -96,10 +100,25 @@ export const database = {
     return { data, error };
   },
 
+  async getEmployee(id: string) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("employees")
+      .select("*")
+      .eq("id", id)
+      .single();
+    return { data, error };
+  },
+
   async createEmployee(employee: {
     email: string;
     name: string;
     activation_token?: string;
+    title?: string;
+    team_id?: string;
+    shared_settings_id?: string;
+    type?: 'personal' | 'office';
   }) {
     if (!supabase)
       return { data: null, error: { message: "Supabase not configured" } };
@@ -240,6 +259,17 @@ export const database = {
     return { data, error };
   },
 
+  async getProject(id: string) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("id", id)
+      .single();
+    return { data, error };
+  },
+
   async createProject(project: {
     name: string;
     description?: string;
@@ -289,6 +319,17 @@ export const database = {
     }
 
     const { data, error } = await query;
+    return { data, error };
+  },
+
+  async getTask(id: string) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*, projects(*)")
+      .eq("id", id)
+      .single();
     return { data, error };
   },
 
@@ -383,16 +424,15 @@ export const database = {
     if (!supabase)
       return { data: [], error: { message: "Supabase not configured" } };
 
-    if (!employeeId) {
-      return { data: [], error: { message: "Employee ID is required" } };
-    }
-
     let query = supabase
       .from("screenshots")
       .select("*, employees(*), time_entries(*)")
       .order("captured_at", { ascending: false });
 
-    query = query.eq("employee_id", employeeId);
+    // Only filter by employee if provided
+    if (employeeId) {
+      query = query.eq("employee_id", employeeId);
+    }
 
     const { data, error } = await query;
 
