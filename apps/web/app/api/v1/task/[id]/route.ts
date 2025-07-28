@@ -4,10 +4,11 @@ import { database } from "@time-tracker/api";
 // GET /api/v1/task/[id] - Get specific task (Insightful API format)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { data, error } = await database.getTask(params.id);
+    const { id } = await params;
+    const { data, error } = await database.getTask(id);
     
     if (error) {
       return NextResponse.json(
@@ -51,9 +52,10 @@ export async function GET(
 // PUT /api/v1/task/[id] - Update task (Insightful API format)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const updates = await request.json();
     
     // Transform Insightful format to our database format
@@ -61,7 +63,7 @@ export async function PUT(
     if (updates.name) dbUpdates.name = updates.name;
     if (updates.status) dbUpdates.status = updates.status;
     
-    const { data, error } = await database.updateTask(params.id, dbUpdates);
+    const { data, error } = await database.updateTask(id, dbUpdates);
 
     if (error) {
       return NextResponse.json(
@@ -98,10 +100,11 @@ export async function PUT(
 // DELETE /api/v1/task/[id] - Delete task (Insightful API format)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { error } = await database.deleteTask(params.id);
+    const { id } = await params;
+    const { error } = await database.deleteTask(id);
 
     if (error) {
       return NextResponse.json(

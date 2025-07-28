@@ -19,7 +19,8 @@
         "PASS",
         "NODE_ENV",
         "INSIGHTFUL_API_TOKEN",
-        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN"
+        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN",
+        "ORGANIZATION_ID"
       ],
       "cache": true
     },
@@ -40,7 +41,8 @@
         "PASS",
         "NODE_ENV",
         "INSIGHTFUL_API_TOKEN",
-        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN"
+        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN",
+        "ORGANIZATION_ID"
       ]
     },
     "lint": {
@@ -65,7 +67,8 @@
         "PASS",
         "NODE_ENV",
         "INSIGHTFUL_API_TOKEN",
-        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN"
+        "NEXT_PUBLIC_INSIGHTFUL_API_TOKEN",
+        "ORGANIZATION_ID"
       ]
     }
   }
