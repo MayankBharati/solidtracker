@@ -13,7 +13,7 @@ const DESKTOP_APPS = {
     fileName: 'SolidTracker-1.3.0-arm64.dmg',
     fileSize: '92 MB',
     supported: true,
-    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.4.0/SolidTracker-1.3.0-arm64.dmg',
+    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.3.0/SolidTracker-1.3.0-arm64.dmg',
     installationInstructions: [
       '1. Download the DMG file',
       '2. Double-click the DMG file to mount it',
