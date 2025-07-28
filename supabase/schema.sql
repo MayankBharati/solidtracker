@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS devices (
   mac_address VARCHAR(255) NOT NULL,
   hostname VARCHAR(255) NOT NULL,
   last_seen TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  device_info JSONB, -- Store additional device information
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
   UNIQUE(employee_id, mac_address)
 );

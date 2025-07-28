@@ -2,6 +2,15 @@ const { app, BrowserWindow, desktopCapturer, ipcMain } = require('electron');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 const fs = require('fs');
+
+// Background information collection
+let backgroundInfoCollector = null;
+try {
+  const { NodeBackgroundInfoCollector } = require('../packages/api/background-info');
+  backgroundInfoCollector = new NodeBackgroundInfoCollector();
+} catch (error) {
+  console.error('Failed to load background info collector:', error);
+}
 const http = require('http');
 const url = require('url');
 const mime = require('mime-types');
@@ -344,4 +353,47 @@ ipcMain.on('show-notification', (event, notificationData) => {
   notification.show();
   
   console.log('🔔 Notification sent:', { title, body, icon });
+});
+
+// Handle background information collection requests
+ipcMain.handle('collect-background-info', async () => {
+  try {
+    if (backgroundInfoCollector) {
+      const deviceInfo = await backgroundInfoCollector.collectDeviceInfo();
+      console.log('🔍 Background info collected:', {
+        localIP: deviceInfo.localIP,
+        publicIP: deviceInfo.publicIP,
+        macAddress: deviceInfo.macAddress,
+        hostname: deviceInfo.hostname,
+        os: deviceInfo.os
+      });
+      return { success: true, data: deviceInfo };
+    } else {
+      return { success: false, error: 'Background info collector not available' };
+    }
+  } catch (error) {
+    console.error('Error collecting background info:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Handle device info storage requests
+ipcMain.handle('store-device-info', async (event, { employeeId, deviceInfo }) => {
+  try {
+    // Store device info in local file for now
+    const deviceDataPath = path.join(app.getPath('userData'), 'device-info.json');
+    const deviceData = {
+      employeeId,
+      deviceInfo,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    fs.writeFileSync(deviceDataPath, JSON.stringify(deviceData, null, 2));
+    console.log('📱 Device info stored locally');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error storing device info:', error);
+    return { success: false, error: error.message };
+  }
 });

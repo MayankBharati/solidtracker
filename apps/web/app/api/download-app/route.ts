@@ -10,18 +10,10 @@ const DESKTOP_APPS = {
     downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.3.0/SolidTracker-Setup-1.3.0.exe'
   },
   mac: {
-    fileName: 'SolidTracker-1.3.0-arm64-mac.zip',
-    fileSize: '229 MB',
-    supported: true,
-    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.3.2/SolidTracker-1.3.0-arm64-mac.zip',
-    installationInstructions: [
-      '1. Download and extract the ZIP file',
-      '2. If you see "app is damaged" warning:',
-      '   • Right-click on SolidTracker.app and select "Open"',
-      '   • OR: Open Terminal and run: xattr -cr /path/to/SolidTracker.app',
-      '3. Click "Open" in the security dialog if prompted',
-      '4. The app will run normally after the first approval'
-    ]
+    fileName: 'SolidTracker.1.2.0.dmg',
+    fileSize: '~85 MB',
+    supported: false,
+    downloadUrl: 'https://github.com/MayankBharati/solidtracker/releases/download/v1.2.0/SolidTracker.1.2.0.dmg'
   },
   linux: {
     fileName: 'SolidTracker.1.2.0.AppImage', 
@@ -75,15 +67,15 @@ export async function GET(request: NextRequest) {
         platform: platform
       }
     }, { status: 503 });
-
-  } catch (error) {
+        
+      } catch (error) {
     console.error('Download app API error:', error);
-    return NextResponse.json({ 
+        return NextResponse.json({ 
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
-  }
-}
+          details: error instanceof Error ? error.message : 'Unknown error' 
+        }, { status: 500 });
+      }
+    }
 
 // Alternative endpoint to get download information without triggering download
 export async function POST(request: NextRequest) {

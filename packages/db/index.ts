@@ -58,23 +58,46 @@ export interface TeamAssignment {
   team?: Team;
 }
 
+export interface TeamProject {
+  id: string;
+  team_id: string;
+  project_id: string;
+  created_at: string;
+  team?: Team;
+  project?: Project;
+}
+
+export interface TeamTask {
+  id: string;
+  team_id: string;
+  task_id: string;
+  created_at: string;
+  team?: Team;
+  task?: Task;
+}
+
 export interface Project {
   id: string;
   name: string;
   description?: string;
   hourly_rate?: number;
   status: "active" | "inactive" | "completed";
+  team_id?: string;
   created_at: string;
   updated_at: string;
+  team?: Team;
 }
 
 export interface Task {
   id: string;
   name: string;
   project_id: string;
+  team_id?: string;
   status: "Pending" | "Completed";
   created_at: string;
   updated_at: string;
+  project?: Project;
+  team?: Team;
 }
 
 export interface TimeEntry {
@@ -107,6 +130,12 @@ export interface Device {
   hostname: string;
   last_seen: string;
   created_at: string;
+  updated_at: string;
+  device_info?: any; // Add deviceInfo property for background information
+  // Additional fields for device info page (merged from employee data)
+  name?: string;
+  email?: string;
+  deviceInfo?: any; // Alias for device_info for compatibility
 }
 
 export interface Admin {

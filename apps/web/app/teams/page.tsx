@@ -183,6 +183,12 @@ export default function TeamsPage() {
                   Dashboard
                 </Button>
               </Link>
+              <Link href="/teams/enhanced">
+                <Button variant="outline" className="hover:bg-green-50 hover:border-green-200 text-green-700 border-green-300">
+                  <Users className="h-4 w-4 mr-2" />
+                  Enhanced Teams
+                </Button>
+              </Link>
               <Button variant="outline" onClick={logout} className="hover:bg-red-50 hover:border-red-200">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout

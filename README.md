@@ -126,7 +126,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key-here"
 
 # App Configuration (REQUIRED)
 NEXT_PUBLIC_APP_URL="http://localhost:3001"
-```
+   ```
 
 #### 3. Desktop Electron App: `apps/desktop/.env.local`
 ```bash
@@ -178,11 +178,11 @@ npm run dev:desktop      # Employee Interface (port 3001)
 **URL**: [http://localhost:3000](http://localhost:3000)
 
 **Features**:
-- Employee management and onboarding
-- Project and task creation
-- Time reports and analytics
-- Screenshot monitoring dashboard
-- Employee activation system
+  - Employee management and onboarding
+  - Project and task creation
+  - Time reports and analytics
+  - Screenshot monitoring dashboard
+  - Employee activation system
 
 **Default Login**: Create admin user in Supabase dashboard
 
@@ -190,10 +190,10 @@ npm run dev:desktop      # Employee Interface (port 3001)
 **URL**: [http://localhost:3001](http://localhost:3001)
 
 **Features**:
-- Time tracking with start/stop functionality
-- Project and task selection
-- Real-time timer display
-- Screenshot capture integration
+  - Time tracking with start/stop functionality
+  - Project and task selection
+  - Real-time timer display
+  - Screenshot capture integration
 
 **Login**: Use employee credentials created by admin
 

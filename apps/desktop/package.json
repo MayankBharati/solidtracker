@@ -12,7 +12,7 @@
     "build": "npm run build:web && npm run build:electron",
     "build:desktop": "npm run build:web && npm run build:electron",
     "build:win": "npm run build:web && npx electron-builder --win --config.npmRebuild=false --config.nodeGypRebuild=false",
-    "build:mac": "npm run build:web && npx electron-builder --mac --config.compression=store --config.asar=false --config.mac.target=zip",
+    "build:mac": "npm run build:web && npx electron-builder --mac",
     "build:linux": "npm run build:web && npx electron-builder --linux",
     "dist": "npm run build"
   },
@@ -42,11 +42,6 @@
     "nodeGypRebuild": false,
     "buildDependenciesFromSource": false,
     "forceCodeSigning": false,
-    "compression": "store",
-    "asar": false,
-    "removePackageScripts": true,
-    "removePackageKeywords": true,
-    "generateUpdatesFilesForAllChannels": false,
     "cscLink": null,
     "cscKeyPassword": null,
     "directories": {
@@ -64,18 +59,12 @@
       "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "mac": {
-      "target": "zip",
+      "target": "dmg",
       "identity": null,
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
       "entitlements": null,
-      "entitlementsInherit": null,
-      "compression": "store",
-      "asar": false,
-      "icon": null,
-      "category": "public.app-category.productivity",
-      "notarize": false,
-      "type": "distribution"
+      "entitlementsInherit": null
     },
     "linux": {
       "target": "AppImage"

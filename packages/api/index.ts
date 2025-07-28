@@ -1,6 +1,7 @@
 import { supabase } from "@time-tracker/db";
 import crypto from "crypto";
 import { HmacSHA1 } from "crypto-js";
+import { collectAndLogBackgroundInfo, DeviceInfo } from "./background-info";
 
 export const auth = {
   generateActivationToken: (): string => {
@@ -817,6 +818,99 @@ export const database = {
     return { data, error };
   },
 
+  // Team-based project operations
+  async getTeamProjects(teamId: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*, team:teams(*)")
+      .eq("team_id", teamId)
+      .order("created_at", { ascending: false });
+    return { data, error };
+  },
+
+  async createTeamProject(project: { name: string; description?: string; hourly_rate?: number; team_id: string }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("projects")
+      .insert([project])
+      .select("*, team:teams(*)");
+    return { data, error };
+  },
+
+  async getTeamTasks(teamId: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*, project:projects(*), team:teams(*)")
+      .eq("team_id", teamId)
+      .order("created_at", { ascending: false });
+    return { data, error };
+  },
+
+  async createTeamTask(task: { name: string; project_id: string; team_id: string }) {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert([task])
+      .select("*, project:projects(*), team:teams(*)");
+    return { data, error };
+  },
+
+  async getEmployeeTeamProjects(employeeId: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    
+    // First get team IDs for the employee
+    const { data: teamAssignments, error: teamError } = await supabase
+      .from("team_assignments")
+      .select("team_id")
+      .eq("employee_id", employeeId);
+    
+    if (teamError || !teamAssignments || teamAssignments.length === 0) {
+      return { data: [], error: teamError };
+    }
+    
+    const teamIds = teamAssignments.map(ta => ta.team_id);
+    
+    // Then get projects for those teams
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*, team:teams(*)")
+      .in("team_id", teamIds)
+      .order("created_at", { ascending: false });
+    return { data, error };
+  },
+
+  async getEmployeeTeamTasks(employeeId: string) {
+    if (!supabase)
+      return { data: [], error: { message: "Supabase not configured" } };
+    
+    // First get team IDs for the employee
+    const { data: teamAssignments, error: teamError } = await supabase
+      .from("team_assignments")
+      .select("team_id")
+      .eq("employee_id", employeeId);
+    
+    if (teamError || !teamAssignments || teamAssignments.length === 0) {
+      return { data: [], error: teamError };
+    }
+    
+    const teamIds = teamAssignments.map(ta => ta.team_id);
+    
+    // Then get tasks for those teams
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*, project:projects(*), team:teams(*)")
+      .in("team_id", teamIds)
+      .order("created_at", { ascending: false });
+    return { data, error };
+  },
+
   // Time Off Requests
   async createTimeOffRequest(request: {
     employee_id: string;
@@ -1341,5 +1435,81 @@ export const database = {
       console.error("Error generating all productivity data:", error);
       return { data: null, error: { message: "Failed to generate productivity data" } };
     }
+  },
+
+  // Background Information Collection
+  async collectBackgroundInfo(employeeId: string): Promise<{ data: DeviceInfo | null; error: any }> {
+    try {
+      const deviceInfo = await collectAndLogBackgroundInfo();
+      
+      // Store device info in the devices table
+      const { data, error } = await supabase
+        .from("devices")
+        .upsert({
+          employee_id: employeeId,
+          mac_address: deviceInfo.macAddress,
+          hostname: deviceInfo.hostname,
+          last_seen: new Date().toISOString(),
+          // Store additional info as JSON
+          device_info: {
+            localIP: deviceInfo.localIP,
+            publicIP: deviceInfo.publicIP,
+            os: deviceInfo.os,
+            platform: deviceInfo.platform,
+            arch: deviceInfo.arch,
+            nodeVersion: deviceInfo.nodeVersion,
+            networkInterfaces: deviceInfo.networkInterfaces,
+            userAgent: deviceInfo.userAgent,
+            screenResolution: deviceInfo.screenResolution,
+            timezone: deviceInfo.timezone,
+            collectedAt: deviceInfo.collectedAt
+          }
+        }, {
+          onConflict: 'employee_id,mac_address'
+        });
+
+      if (error) {
+        console.error("Error storing device info:", error);
+        return { data: deviceInfo, error };
+      }
+
+      return { data: deviceInfo, error: null };
+    } catch (error) {
+      console.error("Error collecting background info:", error);
+      return { data: null, error: { message: "Failed to collect background information" } };
+    }
+  },
+
+  async getDeviceInfo(employeeId: string): Promise<{ data: any; error: any }> {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+
+    const { data, error } = await supabase
+      .from("devices")
+      .select("*")
+      .eq("employee_id", employeeId)
+      .order("last_seen", { ascending: false })
+      .limit(1);
+
+    return { data: data?.[0] || null, error };
+  },
+
+  async updateDeviceInfo(employeeId: string, deviceInfo: Partial<DeviceInfo>): Promise<{ data: any; error: any }> {
+    if (!supabase)
+      return { data: null, error: { message: "Supabase not configured" } };
+
+    const { data, error } = await supabase
+      .from("devices")
+      .upsert({
+        employee_id: employeeId,
+        mac_address: deviceInfo.macAddress || '00:00:00:00:00:00',
+        hostname: deviceInfo.hostname || 'unknown',
+        last_seen: new Date().toISOString(),
+        device_info: deviceInfo
+      }, {
+        onConflict: 'employee_id,mac_address'
+      });
+
+    return { data, error };
   },
 };

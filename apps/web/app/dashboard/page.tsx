@@ -20,6 +20,9 @@ import {
   UserCheck,
   BarChart3,
   Download,
+  Monitor,
+  Network,
+  HardDrive,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -306,25 +309,54 @@ export default function DashboardPage() {
             <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-white/70 backdrop-blur-sm group-hover:scale-[1.02]">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
-                    <TrendingUp className="h-6 w-6 text-white" />
+                  <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl">
+                    <Activity className="h-6 w-6 text-white" />
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
                 </div>
                 <CardTitle className="text-xl font-bold text-gray-900">Productivity Analytics</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">
-                  Track employee productivity scores, app usage patterns, and performance metrics.
+                  Track employee productivity scores and performance metrics with detailed analytics.
+                </p>
+                <div className="flex items-center space-x-4 text-sm">
+                  <span className="flex items-center text-purple-600">
+                    <BarChart3 className="h-4 w-4 mr-1" />
+                    Real-time monitoring
+                  </span>
+                  <span className="flex items-center text-gray-500">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    Performance metrics
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/device-info" className="group">
+            <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-white/70 backdrop-blur-sm group-hover:scale-[1.02]">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
+                    <Monitor className="h-6 w-6 text-white" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-xl font-bold text-gray-900">Device Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  View background information collected from employee devices and network details.
                 </p>
                 <div className="flex items-center space-x-4 text-sm">
                   <span className="flex items-center text-green-600">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    Performance
+                    <Activity className="h-4 w-4 mr-1" />
+                    IP & MAC tracking
                   </span>
                   <span className="flex items-center text-gray-500">
-                    <BarChart3 className="h-4 w-4 mr-1" />
-                    Analytics
+                    <Monitor className="h-4 w-4 mr-1" />
+                    System details
                   </span>
                 </div>
               </CardContent>
@@ -390,7 +422,7 @@ export default function DashboardPage() {
                 </Button>
               </Link>
               <Link href="/download">
-                <Button variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-200">
+              <Button variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-200">
                   <Download className="h-4 w-4 mr-2" />
                   Download App
                 </Button>
