@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getInsightfulClient } from "@time-tracker/api";
+import { initializeInsightfulClient, getInsightfulClient } from "@time-tracker/api";
 
 export async function POST(request: NextRequest) {
   try {
     const { action, ...data } = await request.json();
     
-    if (!process.env.INSIGHTFUL_API_TOKEN) {
+    const apiToken = process.env.INSIGHTFUL_API_TOKEN || process.env.NEXT_PUBLIC_INSIGHTFUL_API_TOKEN;
+    
+    if (!apiToken) {
       return NextResponse.json(
         { error: "Insightful API token not configured" },
         { status: 500 }
       );
     }
 
+    // Initialize the client with the API token before using it
+    initializeInsightfulClient(apiToken);
     const client = getInsightfulClient();
     let result;
 
