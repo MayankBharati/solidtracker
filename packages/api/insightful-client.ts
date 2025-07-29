@@ -305,17 +305,53 @@ export class InsightfulClient {
     projectId: string;
     taskId: string;
   }) {
-    // Note: Insightful API may require different endpoint for starting time
-    // This is a placeholder - check actual API docs
-    const response = await this.client.post('/window/start', data);
-    return response.data;
+    // Call the local SolidTracker API endpoint that mimics Insightful format
+    const timeEntryData = {
+      employeeId: data.employeeId,
+      projectId: data.projectId,
+      taskId: data.taskId,
+      start: Date.now(), // Current timestamp
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
+    
+    // Call local endpoint instead of external Insightful API
+    const localApiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const response = await fetch(`${localApiUrl}/api/v1/window`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(timeEntryData),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   }
 
   async stopTimeEntry(id: string) {
-    // Note: Insightful API may require different endpoint for stopping time
-    // This is a placeholder - check actual API docs
-    const response = await this.client.post(`/window/stop/${id}`);
-    return response.data;
+    // Stop the timer by updating the time entry with an end time
+    const updateData = {
+      end: Date.now(), // Current timestamp as end time
+    };
+    
+    // Call local endpoint instead of external Insightful API
+    const localApiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const response = await fetch(`${localApiUrl}/api/v1/window/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updateData),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   }
 
   async createManualTimeEntry(data: {
@@ -326,8 +362,31 @@ export class InsightfulClient {
     end: number;
     timezone?: string;
   }) {
-    const response = await this.client.post('/window', data);
-    return response.data;
+    // Call the local SolidTracker API endpoint that mimics Insightful format
+    const timeEntryData = {
+      employeeId: data.employeeId,
+      projectId: data.projectId,
+      taskId: data.taskId,
+      start: data.start,
+      end: data.end,
+      timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
+    
+    // Call local endpoint instead of external Insightful API
+    const localApiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const response = await fetch(`${localApiUrl}/api/v1/window`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(timeEntryData),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   }
 
   // Screenshots API

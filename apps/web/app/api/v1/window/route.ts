@@ -68,12 +68,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data, error } = await database.createTimeEntry({
-      employee_id: employeeId,
-      project_id: projectId,
-      task_id: taskId,
-      started_at: new Date(start || Date.now()).toISOString(),
-    });
+    let data, error;
+
+    // Check if this is a manual entry (has both start and end) or a timer start (only start)
+    if (end) {
+      // Manual time entry with predefined start and end times
+      const startTime = new Date(start || Date.now());
+      const endTime = new Date(end);
+      const durationInSeconds = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+
+      // Create the time entry first
+      const createResult = await database.createTimeEntry({
+        employee_id: employeeId,
+        project_id: projectId,
+        task_id: taskId,
+        started_at: startTime.toISOString(),
+      });
+      
+      if (createResult.error) {
+        data = createResult.data;
+        error = createResult.error;
+      } else {
+        // Update it immediately with end time and duration
+        const timeEntryId = createResult.data[0].id;
+        const updateResult = await database.updateTimeEntry(timeEntryId, {
+          ended_at: endTime.toISOString(),
+          duration: durationInSeconds,
+        });
+        
+        data = updateResult.data;
+        error = updateResult.error;
+      }
+    } else {
+      // Timer start - use the more robust startTimeEntry function that checks for existing active entries
+      const result = await database.startTimeEntry(employeeId, projectId, taskId);
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) {
       return NextResponse.json(
@@ -82,15 +113,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!data) {
+      return NextResponse.json(
+        { error: "No data returned from time entry creation" },
+        { status: 500 }
+      );
+    }
+
+    // Handle both array (from updateTimeEntry) and object (from startTimeEntry) responses
+    const timeEntry = Array.isArray(data) ? data[0] : data;
+    
+    if (!timeEntry) {
+      return NextResponse.json(
+        { error: "No time entry data found" },
+        { status: 500 }
+      );
+    }
+
     // Transform to Insightful format
     const insightfulWindow = {
-      id: data[0].id,
-      employeeId: data[0].employee_id,
-      projectId: data[0].project_id,
-      taskId: data[0].task_id,
-      start: new Date(data[0].started_at).getTime(),
-      end: data[0].ended_at ? new Date(data[0].ended_at).getTime() : undefined,
-      duration: data[0].duration || 0,
+      id: timeEntry.id,
+      employeeId: timeEntry.employee_id,
+      projectId: timeEntry.project_id,
+      taskId: timeEntry.task_id,
+      start: new Date(timeEntry.started_at).getTime(),
+      end: timeEntry.ended_at ? new Date(timeEntry.ended_at).getTime() : undefined,
+      duration: timeEntry.duration || 0,
       timezone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       timezoneOffset: new Date().getTimezoneOffset() * 60000,
       paid: true,
@@ -106,8 +154,8 @@ export async function POST(request: NextRequest) {
       osVersion: "unknown",
       teamId: "default",
       organizationId: process.env.ORGANIZATION_ID || "default",
-      startTranslated: new Date(data[0].started_at).getTime(),
-      endTranslated: data[0].ended_at ? new Date(data[0].ended_at).getTime() : undefined,
+      startTranslated: new Date(timeEntry.started_at).getTime(),
+      endTranslated: timeEntry.ended_at ? new Date(timeEntry.ended_at).getTime() : undefined,
     };
 
     return NextResponse.json(insightfulWindow, { status: 201 });
