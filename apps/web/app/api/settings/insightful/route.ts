@@ -84,10 +84,6 @@ export async function POST(request: NextRequest) {
     // Only update API token if it's not the masked value
     if (apiToken && apiToken !== "••••••••") {
       updates.push({ key: "api_token", value: apiToken });
-      
-      // Update environment variable for current session
-      process.env.INSIGHTFUL_API_TOKEN = apiToken;
-      process.env.NEXT_PUBLIC_INSIGHTFUL_API_TOKEN = apiToken;
     }
 
     // Upsert settings
