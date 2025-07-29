@@ -5,6 +5,8 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import { database } from '@time-tracker/api';
+import { supabase } from '@time-tracker/db';
 
 // Types based on Insightful API documentation
 export interface InsightfulEmployee {
@@ -300,61 +302,121 @@ export class InsightfulClient {
     return response.data;
   }
 
-  async startTimeEntry(data: {
+    async startTimeEntry(data: {
     employeeId: string;
     projectId: string;
     taskId: string;
   }) {
-    // Call the local SolidTracker API endpoint that mimics Insightful format
-    const timeEntryData = {
-      employeeId: data.employeeId,
-      projectId: data.projectId,
-      taskId: data.taskId,
-      start: Date.now(), // Current timestamp
+    // Directly call the database function instead of making HTTP requests
+    // This avoids server-to-server communication issues in production
+    
+    const { data: result, error } = await database.startTimeEntry(
+      data.employeeId, 
+      data.projectId, 
+      data.taskId
+    );
+
+    if (error) {
+      throw new Error(error.message || "Failed to start time entry");
+    }
+
+    if (!result) {
+      throw new Error("No data returned from time entry creation");
+    }
+
+    // Transform to Insightful format
+    const insightfulWindow = {
+      id: result.id,
+      employeeId: result.employee_id,
+      projectId: result.project_id,
+      taskId: result.task_id,
+      start: new Date(result.started_at).getTime(),
+      end: result.ended_at ? new Date(result.ended_at).getTime() : undefined,
+      duration: result.duration || 0,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezoneOffset: new Date().getTimezoneOffset() * 60000,
+      paid: true,
+      billable: true,
+      overtime: false,
+      type: "manual",
+      name: "Unknown",
+      user: "unknown@company.com",
+      domain: "company.com",
+      computer: "unknown",
+      hwid: "unknown",
+      os: "unknown",
+      osVersion: "unknown",
+      teamId: "default",
+      organizationId: "default",
+      startTranslated: new Date(result.started_at).getTime(),
     };
-    
-    // Call local endpoint instead of external Insightful API
-    const localApiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${localApiUrl}/api/v1/window`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(timeEntryData),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
+
+    return { success: true, data: insightfulWindow };
   }
 
-  async stopTimeEntry(id: string) {
-    // Stop the timer by updating the time entry with an end time
-    const updateData = {
-      end: Date.now(), // Current timestamp as end time
-    };
+    async stopTimeEntry(id: string) {
+    // Directly call the database function instead of making HTTP requests
     
-    // Call local endpoint instead of external Insightful API
-    const localApiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${localApiUrl}/api/v1/window/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updateData),
-    });
+    // Get the existing time entry to calculate duration
+    const { data: existingEntry, error: fetchError } = await supabase
+      .from("time_entries")
+      .select("*")
+      .eq("id", id)
+      .single();
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (fetchError || !existingEntry) {
+      throw new Error("Time entry not found");
     }
+
+    const startTime = new Date(existingEntry.started_at);
+    const endTime = new Date();
+    const durationInSeconds = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
     
-    return await response.json();
+    const { data, error } = await database.updateTimeEntry(id, {
+      ended_at: endTime.toISOString(),
+      duration: durationInSeconds,
+    });
+
+    if (error) {
+      throw new Error(error.message || "Failed to update time entry");
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error("No data returned from time entry update");
+    }
+
+    // Transform to Insightful format
+    const insightfulWindow = {
+      id: data[0].id,
+      employeeId: data[0].employee_id,
+      projectId: data[0].project_id,
+      taskId: data[0].task_id,
+      start: new Date(data[0].started_at).getTime(),
+      end: new Date(data[0].ended_at).getTime(),
+      duration: data[0].duration || 0,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezoneOffset: new Date().getTimezoneOffset() * 60000,
+      paid: true,
+      billable: true,
+      overtime: false,
+      type: "manual",
+      name: "Unknown",
+      user: "unknown@company.com",
+      domain: "company.com",
+      computer: "unknown",
+      hwid: "unknown",
+      os: "unknown",
+      osVersion: "unknown",
+      teamId: "default",
+      organizationId: "default",
+      startTranslated: new Date(data[0].started_at).getTime(),
+      endTranslated: new Date(data[0].ended_at).getTime(),
+    };
+
+    return { success: true, data: insightfulWindow };
   }
 
-  async createManualTimeEntry(data: {
+    async createManualTimeEntry(data: {
     employeeId: string;
     projectId: string;
     taskId: string;
@@ -362,31 +424,64 @@ export class InsightfulClient {
     end: number;
     timezone?: string;
   }) {
-    // Call the local SolidTracker API endpoint that mimics Insightful format
-    const timeEntryData = {
-      employeeId: data.employeeId,
-      projectId: data.projectId,
-      taskId: data.taskId,
-      start: data.start,
-      end: data.end,
-      timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-    };
+    // Directly call the database function instead of making HTTP requests
     
-    // Call local endpoint instead of external Insightful API
-    const localApiUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${localApiUrl}/api/v1/window`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(timeEntryData),
+    // Calculate duration
+    const startTime = new Date(data.start);
+    const endTime = new Date(data.end);
+    const durationInSeconds = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+
+    // Create the time entry first
+    const { data: createResult, error: createError } = await database.createTimeEntry({
+      employee_id: data.employeeId,
+      project_id: data.projectId,
+      task_id: data.taskId,
+      started_at: startTime.toISOString(),
     });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+
+    if (createError || !createResult || createResult.length === 0) {
+      throw new Error(createError?.message || "Failed to create time entry");
     }
-    
-    return await response.json();
+
+    // Update with end time and duration
+    const { data: updateResult, error: updateError } = await database.updateTimeEntry(createResult[0].id, {
+      ended_at: endTime.toISOString(),
+      duration: durationInSeconds,
+    });
+
+    if (updateError || !updateResult || updateResult.length === 0) {
+      throw new Error(updateError?.message || "Failed to update time entry");
+    }
+
+    // Transform to Insightful format
+    const insightfulWindow = {
+      id: updateResult[0].id,
+      employeeId: updateResult[0].employee_id,
+      projectId: updateResult[0].project_id,
+      taskId: updateResult[0].task_id,
+      start: new Date(updateResult[0].started_at).getTime(),
+      end: new Date(updateResult[0].ended_at).getTime(),
+      duration: updateResult[0].duration || 0,
+      timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezoneOffset: new Date().getTimezoneOffset() * 60000,
+      paid: true,
+      billable: true,
+      overtime: false,
+      type: "manual",
+      name: "Unknown",
+      user: "unknown@company.com",
+      domain: "company.com",
+      computer: "unknown",
+      hwid: "unknown",
+      os: "unknown",
+      osVersion: "unknown",
+      teamId: "default",
+      organizationId: "default",
+      startTranslated: new Date(updateResult[0].started_at).getTime(),
+      endTranslated: new Date(updateResult[0].ended_at).getTime(),
+    };
+
+    return { success: true, data: insightfulWindow };
   }
 
   // Screenshots API
