@@ -41,10 +41,10 @@ function loadEnvironmentVariables() {
 
   // Method 3: Hardcode the values as fallback (for production)
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://iknllebjjgmtfipljclm.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://objhyaovgeqzmitxjaoe.supabase.co';
   }
   if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrbmxsZWJqamdtdGZpcGxqY2xtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1MTA3OTEsImV4cCI6MjA2OTA4Njc5MX0.OuD_EyNZUdNAUejJuYK-7T50PllIq9-_OMqLvmkhMPk';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iamh5YW92Z2Vxem1pdHhqYW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNDI0MzksImV4cCI6MjA4OTgxODQzOX0.z0E8tbx1NmcTiJby4W9IOuBveS_Szb8Nfi3mDPiOGec';
   }
 }
 
